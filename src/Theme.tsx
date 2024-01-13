@@ -24,13 +24,16 @@ const themeLight = createTheme({
     mode: "light",
     background: {
       default: "#c9d0d1",
-      transperent: "rgba(240, 240, 240, 0.55)",
+      transperent: "rgba(255, 255, 255, 0.1)",
     },
     primary: {
       main: "#577894",
     },
     secondary: {
       main: "#bd874a",
+    },
+    info: {
+      main: "#aaa",
     },
   },
 });
@@ -40,13 +43,16 @@ const themeDark = createTheme({
     mode: "dark",
     background: {
       default: "#000",
-      transperent: "rgba(30, 30, 30, 0.2)",
+      transperent: "rgba(255, 255, 255, 0.15)",
     },
     primary: {
       main: "#90caf9",
     },
     secondary: {
       main: "#5c4b40",
+    },
+    info: {
+      main: "#555",
     },
   },
 });

@@ -45,7 +45,6 @@ export default function Landing() {
           <Toolbar
             sx={{
               backdropFilter: "blur(2px)",
-              background: "rgba(0, 0, 0, 0.0)",
             }}
           >
             <Box

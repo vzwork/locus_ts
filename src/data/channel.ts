@@ -12,12 +12,12 @@ interface IChannel {
     countPostsWeek: number;
     countPostsMonth: number;
     countPostsYear: number;
-    countPostsTotal: number;
+    countPostsAll: number;
     countViewsDay: number;
     countViewsWeek: number;
     countViewsMonth: number;
     countViewsYear: number;
-    countViewsTotal: number;
+    countViewsAll: number;
   };
   statisticsSystem: {
     queueCountPosts: number[];

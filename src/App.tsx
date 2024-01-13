@@ -51,6 +51,8 @@ export default function App() {
   managerSession.init();
   const managerChannels = ManagerChannels;
   managerChannels.init();
+  const managerContent = ManagerChannels;
+  managerContent.init();
 
   return (
     <>

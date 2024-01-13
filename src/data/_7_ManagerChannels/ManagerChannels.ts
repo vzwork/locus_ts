@@ -1,12 +1,24 @@
-import { Firestore, doc, getDoc, getFirestore } from "firebase/firestore";
+import {
+  Firestore,
+  arrayRemove,
+  arrayUnion,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getFirestore,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { IChannel } from "../channel";
-import { stateCollections } from "../db";
+import { idRoot, stateCollections } from "../db";
 
 class ManagerChannels {
   private static instance: ManagerChannels;
   private db: Firestore | null = null;
 
   // channel current
+  private idChannelCurrent: string | null = null;
   private channelCurrent: IChannel | null = null;
   private listenersChannelCurrent: ((channel: IChannel) => void)[] = [];
 
@@ -49,20 +61,103 @@ class ManagerChannels {
 
   // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
   // actions
+  public async removeChannelCurrent() {
+    if (!this.db) return;
+    if (!this.channelCurrent) return;
+    if (this.channelCurrent.id === idRoot) return;
+    if (this.channelCurrent.idsChildren.length > 0) return;
+
+    await updateDoc(
+      doc(this.db, stateCollections.channels, this.channelCurrent.idParent),
+      {
+        idsChildren: arrayRemove(this.channelCurrent.id),
+      }
+    ).catch((error) => {
+      console.log(error.message);
+    });
+
+    await deleteDoc(
+      doc(this.db, stateCollections.channels, this.channelCurrent.id)
+    ).catch((error) => {
+      console.log(error.message);
+    });
+
+    this.setChannelCurrent(this.channelCurrent.idParent);
+  }
+
+  public addChannel(name: string, idCreator: string, nameCreator: string) {
+    if (!this.db) return;
+    if (!this.channelCurrent) return;
+
+    const channel: IChannel = {
+      version: "1.0.1",
+      id: "",
+      idParent: this.channelCurrent.id,
+      idsChildren: [],
+      name: name,
+      idCreator,
+      nameCreator,
+      timestampCreation: Date.now(),
+      statistics: {
+        countPostsDay: 0,
+        countPostsWeek: 0,
+        countPostsMonth: 0,
+        countPostsYear: 0,
+        countPostsAll: 0,
+        countViewsDay: 0,
+        countViewsWeek: 0,
+        countViewsMonth: 0,
+        countViewsYear: 0,
+        countViewsAll: 0,
+      },
+      statisticsSystem: {
+        queueCountPosts: [],
+        queuePostsTrigger: false,
+        timestampQueuePostsNextWorkload: Date.now(),
+        queueCountViews: [],
+        queueViewsTrigger: false,
+        timestampQueueViewsNextWorkload: Date.now(),
+      },
+    };
+
+    const docRef = doc(collection(this.db, stateCollections.channels));
+    channel.id = docRef.id;
+
+    setDoc(docRef, channel).catch((error) => {
+      console.log(error.message);
+    });
+
+    updateDoc(doc(this.db, stateCollections.channels, channel.idParent), {
+      idsChildren: arrayUnion(channel.id),
+    }).catch((error) => {
+      console.log(error.message);
+    });
+
+    this.setChannelCurrentForce(channel.idParent);
+  }
+
   public async setChannelCurrent(id: string) {
-    const channelCurrent = await this.getChannel(id);
-    if (channelCurrent) {
-      this.channelCurrent = channelCurrent;
-      this.notifyListenersChannelCurrent();
-    }
+    if (this.idChannelCurrent === id) return;
+    this.setChannelCurrentForce(id);
+  }
 
-    const channelParent = await this.getChannel(channelCurrent?.idParent || "");
-    if (channelParent) {
-      this.channelParent = channelParent;
-      this.notifyListenersChannelParent();
-    }
+  public async setChannelCurrentForce(id: string) {
+    if (!id) return;
+    this.idChannelCurrent = id;
 
-    const channelGrandParent = await this.getChannel(
+    const channelCurrent: any = await this.getChannel(id);
+    if (!channelCurrent) return;
+    this.channelCurrent = channelCurrent;
+    this.notifyListenersChannelCurrent();
+
+    const channelParent = await this.getChannelOptimized(
+      channelCurrent?.idParent || ""
+    );
+    if (!channelParent) return;
+    this.channelParent = channelParent;
+    this.notifyListenersChannelParent();
+
+    const channelGrandParent = await this.getChannelOptimized(
       channelParent?.idParent || ""
     );
     if (channelGrandParent) {
@@ -72,7 +167,7 @@ class ManagerChannels {
 
     const channelCurrentChildren: IChannel[] = [];
     for (const idChild of channelCurrent?.idsChildren || []) {
-      const channelChild = await this.getChannel(idChild);
+      const channelChild = await this.getChannelOptimized(idChild);
       if (channelChild) {
         channelCurrentChildren.push(channelChild);
       }
@@ -80,51 +175,57 @@ class ManagerChannels {
     this.channelCurrentChildren = channelCurrentChildren;
     this.notifyListenersChannelChildren();
 
-    const channelParentChildren: IChannel[] = [];
+    let channelParentChildren: IChannel[] = [];
     for (const idChild of channelParent?.idsChildren || []) {
-      const channelChild = await this.getChannel(idChild);
+      const channelChild = await this.getChannelOptimized(idChild);
       if (channelChild) {
         channelParentChildren.push(channelChild);
       }
     }
+    if (channelParent?.id === channelCurrent?.id && channelCurrent) {
+      channelParentChildren = [channelCurrent];
+    }
+
     this.channelParentChildren = channelParentChildren;
     this.notifyListenersChannelParentChildren();
   }
 
-  private async getChannel(id: string): Promise<IChannel | undefined> {
+  private async getChannelOptimized(id: string): Promise<IChannel | undefined> {
     // check local storage
     // if found and not expired, return
     // else, check firestore
+    if (!id) return undefined;
+
     const stringDateUpdated = localStorage.getItem(
       `channel-${id}-date-updated`
     );
     if (stringDateUpdated) {
       const dateUpdated = Number(stringDateUpdated);
-      if (Date.now() - dateUpdated < 1000 * 60 * 60 * 24) {
+      if (Date.now() - dateUpdated < 1000 * 60 * 60 * 24 * 7) {
         const channel = localStorage.getItem(`channel-${id}`);
         if (channel) {
-          return JSON.parse(channel);
+          return JSON.parse(channel) as IChannel;
         }
       }
     }
 
+    return await this.getChannel(id);
+  }
+
+  private async getChannel(id: string): Promise<IChannel | undefined> {
+    if (!id) return undefined;
     if (!this.db) return undefined;
 
-    await getDoc(doc(this.db, stateCollections.channels, id)).then(
-      (docSnap) => {
-        if (docSnap.exists()) {
-          const channel = docSnap.data();
-          if (channel) {
-            localStorage.setItem(`channel-${id}`, JSON.stringify(channel));
-            localStorage.setItem(
-              `channel-${id}-date-updated`,
-              Date.now().toString()
-            );
-            return channel;
-          }
-        }
+    const docSnap = await getDoc(doc(this.db, stateCollections.channels, id));
+
+    if (docSnap.exists()) {
+      const channel = docSnap.data() as IChannel;
+      localStorage.setItem(`channel-${id}`, JSON.stringify(channel));
+      localStorage.setItem(`channel-${id}-date-updated`, Date.now().toString());
+      if (channel) {
+        return channel;
       }
-    );
+    }
   }
   // actions
   // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
