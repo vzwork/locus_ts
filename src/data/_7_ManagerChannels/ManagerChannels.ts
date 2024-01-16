@@ -7,6 +7,7 @@ import {
   doc,
   getDoc,
   getFirestore,
+  increment,
   setDoc,
   updateDoc,
 } from "firebase/firestore";
@@ -104,19 +105,13 @@ class ManagerChannels {
         countPostsMonth: 0,
         countPostsYear: 0,
         countPostsAll: 0,
+        queueCountPosts: [],
         countViewsDay: 0,
         countViewsWeek: 0,
         countViewsMonth: 0,
         countViewsYear: 0,
         countViewsAll: 0,
-      },
-      statisticsSystem: {
-        queueCountPosts: [],
-        queuePostsTrigger: false,
-        timestampQueuePostsNextWorkload: Date.now(),
         queueCountViews: [],
-        queueViewsTrigger: false,
-        timestampQueueViewsNextWorkload: Date.now(),
       },
     };
 
@@ -142,11 +137,26 @@ class ManagerChannels {
   }
 
   public async setChannelCurrentForce(id: string) {
+    if (!this.db) return;
     if (!id) return;
     this.idChannelCurrent = id;
 
     const channelCurrent: any = await this.getChannel(id);
     if (!channelCurrent) return;
+    await updateDoc(doc(this.db, stateCollections.channels, id), {
+      "statistics.countViewsAll": increment(1),
+      "statistics.countViewsYear": increment(1),
+      "statistics.countViewsMonth": increment(1),
+      "statistics.countViewsWeek": increment(1),
+      "statistics.countViewsDay": increment(1),
+    }).catch((error) => {
+      console.log(error.message);
+    });
+    channelCurrent.statistics.countViewsAll++;
+    channelCurrent.statistics.countViewsYear++;
+    channelCurrent.statistics.countViewsMonth++;
+    channelCurrent.statistics.countViewsWeek++;
+    channelCurrent.statistics.countViewsDay++;
     this.channelCurrent = channelCurrent;
     this.notifyListenersChannelCurrent();
 
@@ -190,7 +200,7 @@ class ManagerChannels {
     this.notifyListenersChannelParentChildren();
   }
 
-  private async getChannelOptimized(id: string): Promise<IChannel | undefined> {
+  public async getChannelOptimized(id: string): Promise<IChannel | undefined> {
     // check local storage
     // if found and not expired, return
     // else, check firestore

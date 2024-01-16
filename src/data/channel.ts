@@ -13,19 +13,13 @@ interface IChannel {
     countPostsMonth: number;
     countPostsYear: number;
     countPostsAll: number;
+    queueCountPosts: number[];
     countViewsDay: number;
     countViewsWeek: number;
     countViewsMonth: number;
     countViewsYear: number;
     countViewsAll: number;
-  };
-  statisticsSystem: {
-    queueCountPosts: number[];
-    queuePostsTrigger: boolean;
-    timestampQueuePostsNextWorkload: number;
     queueCountViews: number[];
-    queueViewsTrigger: boolean;
-    timestampQueueViewsNextWorkload: number;
   };
 }
 

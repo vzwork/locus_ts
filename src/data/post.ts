@@ -1,6 +1,13 @@
+enum TypePost {
+  Quote = "quote",
+  Article = "article",
+  Video = "video",
+  Photo = "photo",
+}
+
 interface IPost {
   version: string;
-  type: string;
+  type: TypePost;
   timestampCreation: number;
   id: string;
   idCreator: string;
@@ -15,40 +22,33 @@ interface IPost {
     idChannelOriginParent: string;
     nameChannelOriginParent: string;
     idChannelPossibleRebalance: string;
+    timestampWorkloadNext: number;
     idsChannelLocationDay: string[];
     idsChannelLocationWeek: string[];
     idsChannelLocationMonth: string[];
     idsChannelLocationYear: string[];
     idsChannelLocationAll: string[];
-    queueIdsChannelLocation: string[][];
   };
   statistics: {
+    timestampWorkloadNext: number;
     countPositiveDay: number;
     countPositiveWeek: number;
     countPositiveMonth: number;
     countPositiveYear: number;
     countPositiveAll: number;
+    queueCountPositive: number[];
     countStarsDay: number;
     countStarsWeek: number;
     countStarsMonth: number;
     countStarsYear: number;
     countStarsAll: number;
+    queueCountStars: number[];
     countBooksDay: number;
     countBooksWeek: number;
     countBooksMonth: number;
     countBooksYear: number;
     countBooksAll: number;
-  };
-  systemStatistics: {
     queueCountBooks: number[];
-    workloadQueueCountBooks: boolean;
-    timestampWorkloadNextBooks: number | null;
-    queueCountStars: number[];
-    workloadQueueCountStars: boolean;
-    timestampWorkloadNextStars: number | null;
-    queueCountPositive: number[];
-    workloadQueueCountPositive: boolean;
-    timestampWorkloadNextPositive: number | null;
   };
 }
 
@@ -71,4 +71,5 @@ interface IDataPhoto {
   url: string;
 }
 
-export type { IPost };
+export type { IPost, IDataQuote, IDataArticle, IDataVideo, IDataPhoto };
+export { TypePost };

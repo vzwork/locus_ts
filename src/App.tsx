@@ -18,6 +18,8 @@ import ManagerSession from "./data/_2_ManagerSession/ManagerSession";
 import Channels from "./pages/Channels";
 import Posts from "./pages/Posts";
 import ManagerChannels from "./data/_7_ManagerChannels/ManagerChannels";
+import ManagerContent from "./data/_9_ManagerContent/ManagerContent";
+import ManagerTraceUser from "./data/_4_ManagerTraceUser/ManagerTraceUser";
 
 const WrapperBackground = () => {
   return (
@@ -36,9 +38,11 @@ const router = createBrowserRouter(
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/resetpassword" element={<ResetPassword />} />
-      </Route>
-      <Route path="/channels/:id" element={<Channels />}>
-        <Route path="posts/:id" element={<Posts />} />
+        {/* </Route>
+      <Route> */}
+        <Route path="/channels/:id" element={<Channels />}>
+          <Route path="posts/:id" element={<Posts />} />
+        </Route>
       </Route>
     </Route>
   )
@@ -51,8 +55,10 @@ export default function App() {
   managerSession.init();
   const managerChannels = ManagerChannels;
   managerChannels.init();
-  const managerContent = ManagerChannels;
+  const managerContent = ManagerContent;
   managerContent.init();
+  const managerTraceUser = ManagerTraceUser;
+  managerTraceUser.init();
 
   return (
     <>

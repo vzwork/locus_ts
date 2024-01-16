@@ -23,14 +23,15 @@ const themeLight = createTheme({
   palette: {
     mode: "light",
     background: {
+      paper: "#eee",
       default: "#c9d0d1",
-      transperent: "rgba(255, 255, 255, 0.1)",
+      transperent: "rgba(255, 255, 255, 0.6)",
     },
     primary: {
       main: "#577894",
     },
     secondary: {
-      main: "#bd874a",
+      main: "#ab3094",
     },
     info: {
       main: "#aaa",
@@ -42,8 +43,9 @@ const themeDark = createTheme({
   palette: {
     mode: "dark",
     background: {
+      paper: "#333",
       default: "#000",
-      transperent: "rgba(255, 255, 255, 0.15)",
+      transperent: "rgba(30, 30, 30, 0.7)",
     },
     primary: {
       main: "#90caf9",

@@ -4,8 +4,9 @@ const idRoot = "A7mUJTeNaiTmJWk8HKjo";
 const collectionsTest = {
   posts: "testPosts",
   channels: "testChannels",
-  userTraceStars: "testUserTraceStars",
-  userTraceBooks: "testUserTraceBooks",
+  traceUserStars: "testTraceUserStars",
+  traceUserBooks: "testTraceUserBooks",
+  traceUserComments: "testTraceUserComments",
   comments: "testComments",
   accounts: "testAccounts",
 };
@@ -18,8 +19,9 @@ const storageTest = {
 const collectionsProd = {
   posts: "posts",
   channels: "channels",
-  userTraceStars: "userTraceStars",
-  userTraceBooks: "userTraceBooks",
+  traceUserStars: "traceUserStars",
+  traceUserBooks: "traceUserBooks",
+  traceUserComments: "traceUserComments",
   comments: "comments",
   accounts: "accounts",
 };
