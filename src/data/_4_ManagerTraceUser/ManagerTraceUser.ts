@@ -28,7 +28,17 @@ class ManagerTraceUser {
 
   private constructor() {
     // Private constructor to prevent instantiation
+  }
 
+  public static getInstance(): ManagerTraceUser {
+    if (!ManagerTraceUser.instance) {
+      ManagerTraceUser.instance = new ManagerTraceUser();
+    }
+    return ManagerTraceUser.instance;
+  }
+
+  public init() {
+    this.db = getFirestore();
     const managerAccount = ManagerAccount;
     managerAccount.addListenerAccount((account: IAccount | null) => {
       if (!account) {
@@ -43,17 +53,6 @@ class ManagerTraceUser {
         }
       }
     });
-  }
-
-  public static getInstance(): ManagerTraceUser {
-    if (!ManagerTraceUser.instance) {
-      ManagerTraceUser.instance = new ManagerTraceUser();
-    }
-    return ManagerTraceUser.instance;
-  }
-
-  public init() {
-    this.db = getFirestore();
   }
 
   public async loadTraceData() {

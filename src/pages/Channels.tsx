@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  ButtonGroup,
   Container,
   Dialog,
   DialogTitle,
@@ -11,13 +10,11 @@ import {
   InputAdornment,
   MenuItem,
   Select,
-  SelectChangeEvent,
   TextField,
   Tooltip,
-  useTheme,
 } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Outlet, useNavigate, useParams } from "react-router-dom";
 import ManagerChannels from "../data/_7_ManagerChannels/ManagerChannels";
 import useChannelCurrent from "../data/_7_ManagerChannels/useChannelCurrent";
 import useChannelParent from "../data/_7_ManagerChannels/useChannelParent";
@@ -35,28 +32,19 @@ import NewspaperIcon from "@mui/icons-material/Newspaper";
 import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
 import PhotoCameraFrontIcon from "@mui/icons-material/PhotoCameraFront";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import StarOutlineIcon from "@mui/icons-material/StarOutline";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 
 import { IChannel } from "../data/channel";
 import ManagerContent from "../data/_9_ManagerContent/ManagerContent";
 import { QueryOrder, QueryTimeframe } from "../data/query";
 import { idRoot } from "../data/db";
 import useAccount from "../data/_1_ManagerAccount/useAccount";
-import { time } from "console";
 import usePosts from "../data/_9_ManagerContent/usePosts";
-import { IDataArticle, IDataPhoto, IDataVideo, IPost } from "../data/post";
-import { getBytes, getDownloadURL, getStorage, ref } from "firebase/storage";
-import Article from "./Article";
-import YouTube from "react-youtube";
-import useStateStars from "../data/_4_ManagerTraceUser/useStateStars";
-import useStateBooks from "../data/_4_ManagerTraceUser/useStateBooks";
-import useStateComments from "../data/_4_ManagerTraceUser/useStateComments";
-import StarIcon from "@mui/icons-material/Star";
-import ManagerTraceUser from "../data/_4_ManagerTraceUser/ManagerTraceUser";
+import Post from "../components/Post/Post";
+import ButtonNotifications from "../components/ButtonNotifications/ButtonNotifications";
 
 function formatNumber(num: number) {
   if (num < 1000) {
@@ -74,9 +62,11 @@ export default function Channels() {
   const [width, height] = useWindowSize();
 
   useEffect(() => {
-    if (params.id) {
-      managerChannels.setChannelCurrent(params.id);
+    if (params.idChannel) {
+      managerChannels.setChannelCurrent(params.idChannel);
     }
+    // console.log("params.idChannel", params.idChannel);
+    // console.log("params.idPost", params.idPost);
   });
 
   return (
@@ -96,6 +86,7 @@ export default function Channels() {
           <ChannelsMobile />
         )}
       </Box>
+      <Outlet />
     </>
   );
 }
@@ -227,211 +218,32 @@ function Content() {
   );
 }
 
-function Post({ post }: { post: IPost }) {
-  // general
-  const theme = useTheme();
-  const navigate = useNavigate();
-  const managerContent = ManagerContent;
-  const managerTraceUser = ManagerTraceUser;
-  const account = useAccount();
-
-  // post specific
-  const stars = useStateStars();
-  const books = useStateBooks();
-  const comments = useStateComments();
-
-  return (
-    <>
-      <></>
-      <></>
-      <Box
-        p="0.5rem"
-        bgcolor={"background.transperent"}
-        borderRadius="0.5rem"
-        sx={{ backdropFilter: "blur(2px)" }}
-      >
-        <Box color="info.main" sx={{ display: "flex", alignItems: "center" }}>
-          <Box>{post.nameCreator}</Box>
-          <Divider sx={{ flex: "1", marginX: "1rem" }} />
-          <Box sx={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
-            <VisibilityIcon sx={{ fontSize: "1rem" }} />
-            <Box>{formatNumber(post.countViews)}</Box>
-          </Box>
-        </Box>
-        {post.type === "quote" ? <Quote post={post} /> : null}
-        {post.type === "article" ? <Article post={post} /> : null}
-        {post.type === "photo" ? <Photo post={post} /> : null}
-        {post.type === "video" ? <Video post={post} /> : null}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "right",
-            alignItems: "center",
-          }}
-        >
-          {/* <Divider sx={{ flex: "1", marginRight: "1rem" }} /> */}
-          <Box sx={{ display: "flex", gap: "0.5rem" }}>
-            <Button
-              size="small"
-              variant="outlined"
-              color="info"
-              onClick={() => {
-                if (!account) {
-                  navigate("/signin");
-                  return;
-                }
-                if (!stars?.has(post.id)) {
-                  managerContent.addStarPost(post);
-                  managerTraceUser.addStar(post.id);
-                } else {
-                  managerContent.removeStarPost(post);
-                  managerTraceUser.removeStar(post.id);
-                }
-              }}
-              sx={{
-                borderRadius: "2rem",
-                color: stars?.has(post.id)
-                  ? theme.palette.warning.light
-                  : theme.palette.info.main,
-              }}
-              startIcon={
-                stars?.has(post.id) ? <StarIcon /> : <StarOutlineIcon />
-              }
-            >
-              {formatNumber(post.statistics.countStarsAll)}
-            </Button>
-            <Button
-              size="small"
-              variant="outlined"
-              color="info"
-              onClick={() => {
-                if (!account) {
-                  navigate("/signin");
-                  return;
-                }
-                if (!books?.has(post.id)) {
-                  managerContent.addBookPost(post);
-                  managerTraceUser.addBook(post.id);
-                } else {
-                  managerContent.removeBookPost(post);
-                  managerTraceUser.removeBook(post.id);
-                }
-              }}
-              startIcon={<MenuBookIcon />}
-              sx={{
-                borderRadius: "2rem",
-                color: books?.has(post.id)
-                  ? theme.palette.success.light
-                  : theme.palette.info.main,
-              }}
-            >
-              {formatNumber(post.statistics.countBooksAll)}
-            </Button>
-            <Button
-              size="small"
-              variant="outlined"
-              color="info"
-              onClick={() => {
-                // ManagerContent.setPostCurrent(post.id);
-              }}
-              startIcon={<ChatBubbleOutlineIcon />}
-              sx={{
-                borderRadius: "2rem",
-                color: comments?.has(post.id)
-                  ? theme.palette.secondary.main
-                  : theme.palette.info.main,
-              }}
-            >
-              {formatNumber(post.countComments)}
-            </Button>
-          </Box>
-        </Box>
-      </Box>
-    </>
-  );
-}
-
-function Quote({ post }: { post: IPost }) {
-  const theme = useTheme();
-
-  return (
-    <>
-      <></>
-      <></>
-      <></>
-      {post.data.caption}
-    </>
-  );
-}
-
-function Photo({ post }: { post: IPost }) {
-  const storage = getStorage();
-
-  const [imgURL, setImgURL] = useState<string | undefined>(undefined);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!imgURL && error === "") {
-      const data = post.data as IDataPhoto;
-      getDownloadURL(ref(storage, data.url))
-        .then((thisURL: string) => {
-          setImgURL(thisURL);
-        })
-        .catch((err) => {
-          console.log(err);
-          setError(err);
-        });
-    }
-  });
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        flexDirection: "column",
-      }}
-    >
-      <img
-        alt="img"
-        src={imgURL}
-        style={{
-          width: "100%",
-          objectFit: "contain",
-        }}
-      />
-      <Box color="active.main">{post.data.caption}</Box>
-    </Box>
-  );
-}
-
-function Video({ post }: { post: IPost }) {
-  const opts = {
-    height: "400",
-    width: "100%",
-    playerVars: {
-      // https://developers.google.com/youtube/player_parameters
-      autoplay: 0,
-    },
-  };
-
-  const data = post.data as IDataVideo;
-
-  return (
-    <>
-      <></>
-      <></>
-      <Box>
-        <YouTube
-          videoId={data.id}
-          opts={opts}
-          id="video"
-          //
-        />
-        <Box color="active.main">{data.caption}</Box>
-      </Box>
-    </>
-  );
+function randomCommentsLabel(): string {
+  const labels = [
+    "Dr. Harris, do you concur?",
+    "Ah... here we go again...",
+    "You can't handle the truth!",
+    "I've got a bad feeling about this.",
+    "Why so serious?",
+    "You had me at ~hello~.",
+    "I solemnly swear that I am up to no good.",
+    "Sometimes you gotta run before you can walk.",
+    "It's not what happens to you, but how you react to it that matters.",
+    "Where's the money, Lebowski?",
+    "English, ..., do you speak it?",
+    "I am the one who knocks!",
+    "I'm gonna make him an offer he can't refuse.",
+    "I am the Dude, man",
+    "They call it a Royale with cheese.",
+    "What ain't no country I ever heard of!",
+    "Say what again. Say what again, I dare you, I double dare you!",
+    "Don't go gentle into that good night.",
+    "The things you own end up owning you.",
+    "I am not arguing, I'm just explaining why I am right.",
+    "I am not a monster. I'm just ahead of the curve.",
+    "There is no spoon.",
+  ];
+  return labels[Math.floor(Math.random() * labels.length)];
 }
 
 function DialogAddContent() {
@@ -472,7 +284,7 @@ function DialogAddContent() {
           backdropFilter: "blur(2px)",
         }}
       >
-        add content
+        share
       </Button>
       <Dialog
         open={dialogAddContent}
@@ -1153,6 +965,7 @@ function ContentFilterOrder() {
 
 function ChannelsNavigation() {
   const navigate = useNavigate();
+  const account = useAccount();
 
   return (
     <>
@@ -1174,6 +987,21 @@ function ChannelsNavigation() {
           }}
         >
           <HomeIcon />
+        </IconButton>
+        <IconButton
+          onClick={() => {
+            navigate("/");
+          }}
+        >
+          <EmailOutlinedIcon />
+        </IconButton>
+        <ButtonNotifications />
+        <IconButton
+          onClick={() => {
+            navigate("/");
+          }}
+        >
+          {account ? <ManageAccountsIcon /> : <PersonAddIcon />}
         </IconButton>
       </Box>
     </>

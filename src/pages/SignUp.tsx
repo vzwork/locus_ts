@@ -62,7 +62,7 @@ export default function SignUp() {
       username: "user",
       firstName: "Mr.",
       lastName: "Anonymous",
-      avatarURL: "",
+      urlAvatar: "",
       role: "user",
       createdAt: Date.now(),
       updatedAt: Date.now(),

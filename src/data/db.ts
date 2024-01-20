@@ -9,6 +9,7 @@ const collectionsTest = {
   traceUserComments: "testTraceUserComments",
   comments: "testComments",
   accounts: "testAccounts",
+  notifications: "testNotifications",
 };
 
 const storageTest = {
@@ -24,6 +25,7 @@ const collectionsProd = {
   traceUserComments: "traceUserComments",
   comments: "comments",
   accounts: "accounts",
+  notifications: "notifications",
 };
 
 const storageProd = {

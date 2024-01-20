@@ -4,7 +4,7 @@ interface IAccount {
   username: string;
   firstName: string;
   lastName: string;
-  avatarURL: string;
+  urlAvatar: string;
   role: string;
   createdAt: number;
   updatedAt: number;

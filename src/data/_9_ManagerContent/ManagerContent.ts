@@ -443,27 +443,26 @@ class ManagerContent {
         }
       }
     }
+    const newPost = post;
 
-    await updateDoc(docRef, data)
-      .then(() => {
-        const newPost = post;
-
-        newPost.statistics.countStarsAll++;
-        if (this.timeframe !== QueryTimeframe.all) {
-          newPost.statistics.countStarsYear++;
-          if (this.timeframe !== QueryTimeframe.year) {
-            newPost.statistics.countStarsMonth++;
-            if (this.timeframe !== QueryTimeframe.month) {
-              newPost.statistics.countStarsWeek++;
-              if (this.timeframe !== QueryTimeframe.week) {
-                newPost.statistics.countStarsDay++;
-              }
-            }
+    newPost.statistics.countStarsAll++;
+    if (this.timeframe !== QueryTimeframe.all) {
+      newPost.statistics.countStarsYear++;
+      if (this.timeframe !== QueryTimeframe.year) {
+        newPost.statistics.countStarsMonth++;
+        if (this.timeframe !== QueryTimeframe.month) {
+          newPost.statistics.countStarsWeek++;
+          if (this.timeframe !== QueryTimeframe.week) {
+            newPost.statistics.countStarsDay++;
           }
         }
-        this.updatePostLocally(newPost);
-        this.notifyListenersContent();
-      })
+      }
+    }
+    this.updatePostLocally(newPost);
+    this.notifyListenersContent();
+
+    await updateDoc(docRef, data)
+      .then(() => {})
       .catch((error) => {
         console.error("Error starring post: ", error.message);
       });
@@ -489,28 +488,27 @@ class ManagerContent {
         }
       }
     }
+    const newPost = post;
 
-    await updateDoc(docRef, data)
-      .then(() => {
-        const newPost = post;
-
-        newPost.statistics.countStarsAll--;
-        if (this.timeframe !== QueryTimeframe.all) {
-          newPost.statistics.countStarsYear--;
-          if (this.timeframe !== QueryTimeframe.year) {
-            newPost.statistics.countStarsMonth--;
-            if (this.timeframe !== QueryTimeframe.month) {
-              newPost.statistics.countStarsWeek--;
-              if (this.timeframe !== QueryTimeframe.week) {
-                newPost.statistics.countStarsDay--;
-              }
-            }
+    newPost.statistics.countStarsAll--;
+    if (this.timeframe !== QueryTimeframe.all) {
+      newPost.statistics.countStarsYear--;
+      if (this.timeframe !== QueryTimeframe.year) {
+        newPost.statistics.countStarsMonth--;
+        if (this.timeframe !== QueryTimeframe.month) {
+          newPost.statistics.countStarsWeek--;
+          if (this.timeframe !== QueryTimeframe.week) {
+            newPost.statistics.countStarsDay--;
           }
         }
+      }
+    }
 
-        this.updatePostLocally(newPost);
-        this.notifyListenersContent();
-      })
+    this.updatePostLocally(newPost);
+    this.notifyListenersContent();
+
+    await updateDoc(docRef, data)
+      .then(() => {})
       .catch((error) => {
         console.error("Error unstarring post: ", error.message);
       });
@@ -538,26 +536,26 @@ class ManagerContent {
       }
     }
 
-    await updateDoc(docRef, data)
-      .then(() => {
-        const newPost = post;
+    const newPost = post;
 
-        newPost.statistics.countBooksAll++;
-        if (this.timeframe !== QueryTimeframe.all) {
-          newPost.statistics.countBooksYear++;
-          if (this.timeframe !== QueryTimeframe.year) {
-            newPost.statistics.countBooksMonth++;
-            if (this.timeframe !== QueryTimeframe.month) {
-              newPost.statistics.countBooksWeek++;
-              if (this.timeframe !== QueryTimeframe.week) {
-                newPost.statistics.countBooksDay++;
-              }
-            }
+    newPost.statistics.countBooksAll++;
+    if (this.timeframe !== QueryTimeframe.all) {
+      newPost.statistics.countBooksYear++;
+      if (this.timeframe !== QueryTimeframe.year) {
+        newPost.statistics.countBooksMonth++;
+        if (this.timeframe !== QueryTimeframe.month) {
+          newPost.statistics.countBooksWeek++;
+          if (this.timeframe !== QueryTimeframe.week) {
+            newPost.statistics.countBooksDay++;
           }
         }
-        this.updatePostLocally(newPost);
-        this.notifyListenersContent();
-      })
+      }
+    }
+    this.updatePostLocally(newPost);
+    this.notifyListenersContent();
+
+    await updateDoc(docRef, data)
+      .then(() => {})
       .catch((error) => {
         console.error("Error booking post: ", error.message);
       });
@@ -584,30 +582,44 @@ class ManagerContent {
       }
     }
 
-    await updateDoc(docRef, data)
-      .then(() => {
-        const newPost = post;
+    const newPost = post;
 
-        newPost.statistics.countBooksAll--;
-        if (this.timeframe !== QueryTimeframe.all) {
-          newPost.statistics.countBooksYear--;
-          if (this.timeframe !== QueryTimeframe.year) {
-            newPost.statistics.countBooksMonth--;
-            if (this.timeframe !== QueryTimeframe.month) {
-              newPost.statistics.countBooksWeek--;
-              if (this.timeframe !== QueryTimeframe.week) {
-                newPost.statistics.countBooksDay--;
-              }
-            }
+    newPost.statistics.countBooksAll--;
+    if (this.timeframe !== QueryTimeframe.all) {
+      newPost.statistics.countBooksYear--;
+      if (this.timeframe !== QueryTimeframe.year) {
+        newPost.statistics.countBooksMonth--;
+        if (this.timeframe !== QueryTimeframe.month) {
+          newPost.statistics.countBooksWeek--;
+          if (this.timeframe !== QueryTimeframe.week) {
+            newPost.statistics.countBooksDay--;
           }
         }
+      }
+    }
 
-        this.updatePostLocally(newPost);
-        this.notifyListenersContent();
-      })
+    this.updatePostLocally(newPost);
+    this.notifyListenersContent();
+
+    await updateDoc(docRef, data)
+      .then(() => {})
       .catch((error) => {
         console.error("Error unbooking post: ", error.message);
       });
+  }
+
+  public async incrementCounterCommentLocally(idPost: string) {
+    const post = this.content.find((p) => p.id === idPost);
+    if (!post) return;
+    post.countComments++;
+    this.notifyListenersContent();
+  }
+
+  public async decrementCounterCommentLocally(idPost: string) {
+    const post = this.content.find((p) => p.id === idPost);
+    if (!post) return;
+    post.countComments--;
+    this.notifyListenersContent();
   }
 
   private updatePostLocally(post: IPost) {

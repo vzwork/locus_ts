@@ -16,6 +16,10 @@ import useStateTheme from "./data/_0_ManagerTheme/useThemeMode";
 declare module "@mui/material/styles" {
   interface TypeBackground {
     transperent?: string;
+    transperentHover?: string;
+  }
+  interface TypeInfo {
+    darker?: string;
   }
 }
 
@@ -26,6 +30,7 @@ const themeLight = createTheme({
       paper: "#eee",
       default: "#c9d0d1",
       transperent: "rgba(255, 255, 255, 0.6)",
+      transperentHover: "rgba(255, 255, 255, 0.5)",
     },
     primary: {
       main: "#577894",
@@ -35,6 +40,7 @@ const themeLight = createTheme({
     },
     info: {
       main: "#aaa",
+      // darker: "#555",
     },
   },
 });
@@ -46,6 +52,7 @@ const themeDark = createTheme({
       paper: "#333",
       default: "#000",
       transperent: "rgba(30, 30, 30, 0.7)",
+      transperentHover: "rgba(20, 20, 20, 0.7)",
     },
     primary: {
       main: "#90caf9",
