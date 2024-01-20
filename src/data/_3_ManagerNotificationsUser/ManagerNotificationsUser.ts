@@ -1,7 +1,9 @@
 import {
   Firestore,
+  arrayRemove,
   arrayUnion,
   doc,
+  getDoc,
   getFirestore,
   onSnapshot,
   setDoc,
@@ -12,6 +14,7 @@ import { IAccount } from "../account";
 import ManagerAccount from "../_1_ManagerAccount/ManagerAccount";
 import { stateCollections } from "../db";
 import { IPost } from "../post";
+import { IComment } from "../comment";
 
 class ManagerNotificationsUser {
   private static instance: ManagerNotificationsUser;
@@ -76,18 +79,46 @@ class ManagerNotificationsUser {
 
   // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
   // actions
-  public addNotificationComment(post: IPost, text: string) {
+  public async addNotificationComment(post: IPost, comment: IComment) {
     if (!this.account) return;
+    if (this.account.id === post.idCreator) return;
     if (!this.db) return;
-    const newNotification = {
+    const newNotification: INotifaction = {
       idSender: this.account.id,
+      idPost: post.id,
+      idChannelOrigin: post.navigation.idChannelOrigin,
+      idComment: comment.id,
+      textComment: comment.text,
       usernameSender: this.account.username,
-      urlAvatarSender: this.account.urlAvatar,
+      urlAvatarSender: this.account.urlAvatar ?? "",
       typeContnet: post.type,
       typeNotification: "comment",
-    } as INotifaction;
-    updateDoc(doc(this.db, stateCollections.notifications, post.idCreator), {
-      notifications: arrayUnion(newNotification),
+    };
+    const docCheck = await getDoc(
+      doc(this.db, stateCollections.notifications, post.idCreator)
+    ).catch((error) => {
+      console.log(error.message);
+    });
+    if (!docCheck) return;
+    if (!docCheck.exists()) {
+      setDoc(doc(this.db, stateCollections.notifications, post.idCreator), {
+        notifications: [newNotification],
+      });
+      return;
+    } else {
+      updateDoc(doc(this.db, stateCollections.notifications, post.idCreator), {
+        notifications: arrayUnion(newNotification),
+      });
+    }
+  }
+
+  public deleteNotification(notification: INotifaction) {
+    if (!this.account) return;
+    if (!this.db) return;
+    const notifications = this.notifications.filter((n) => n !== notification);
+    this.notifications = notifications;
+    updateDoc(doc(this.db, stateCollections.notifications, this.account.id), {
+      notifications: arrayRemove(notification),
     });
   }
   // actions

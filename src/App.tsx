@@ -22,6 +22,7 @@ import ManagerContent from "./data/_9_ManagerContent/ManagerContent";
 import ManagerTraceUser from "./data/_4_ManagerTraceUser/ManagerTraceUser";
 import ManagerComments from "./data/_10_ManagerComments/ManagerComments";
 import ManagerNotificationsUser from "./data/_3_ManagerNotificationsUser/ManagerNotificationsUser";
+import ManagerCompetencyUser from "./data/_6_ManagerCompetencyUser/ManagerCompetencyUser";
 
 const WrapperBackground = () => {
   return (
@@ -65,6 +66,8 @@ export default function App() {
   managerComments.init();
   const managerNotificationsUser = ManagerNotificationsUser;
   managerNotificationsUser.init();
+  const managerCompetencyUser = ManagerCompetencyUser;
+  managerCompetencyUser.init();
 
   return (
     <>

@@ -25,6 +25,7 @@ import {
 import { types } from "util";
 import { channel } from "diagnostics_channel";
 import { stat } from "fs";
+import ManagerCompetencyUser from "../_6_ManagerCompetencyUser/ManagerCompetencyUser";
 
 function arraysEqual(a: any, b: any) {
   if (a === b) return true;
@@ -462,7 +463,10 @@ class ManagerContent {
     this.notifyListenersContent();
 
     await updateDoc(docRef, data)
-      .then(() => {})
+      .then(() => {
+        const managerCompetencyUser = ManagerCompetencyUser;
+        managerCompetencyUser.starAnotherUser(post);
+      })
       .catch((error) => {
         console.error("Error starring post: ", error.message);
       });
@@ -555,7 +559,10 @@ class ManagerContent {
     this.notifyListenersContent();
 
     await updateDoc(docRef, data)
-      .then(() => {})
+      .then(() => {
+        const managerCompetencyUser = ManagerCompetencyUser;
+        managerCompetencyUser.bookAnotherUser(post);
+      })
       .catch((error) => {
         console.error("Error booking post: ", error.message);
       });

@@ -10,6 +10,7 @@ const collectionsTest = {
   comments: "testComments",
   accounts: "testAccounts",
   notifications: "testNotifications",
+  competencyUser: "testCompetencyUser",
 };
 
 const storageTest = {
@@ -26,6 +27,7 @@ const collectionsProd = {
   comments: "comments",
   accounts: "accounts",
   notifications: "notifications",
+  competencyUser: "competencyUser",
 };
 
 const storageProd = {

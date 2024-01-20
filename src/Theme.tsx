@@ -36,7 +36,7 @@ const themeLight = createTheme({
       main: "#577894",
     },
     secondary: {
-      main: "#ab3094",
+      main: "#108f71",
     },
     info: {
       main: "#aaa",

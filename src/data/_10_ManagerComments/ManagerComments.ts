@@ -112,7 +112,7 @@ class ManagerComments {
       });
     }
 
-    this.managerNotificationsUser?.addNotificationComment(post, text);
+    this.managerNotificationsUser?.addNotificationComment(post, comment);
     this.managerContent?.incrementCounterCommentLocally(post.id);
   }
   public async addReply(post: IPost, idComment: string, text: string) {
@@ -146,7 +146,7 @@ class ManagerComments {
 
     comments.push(comment);
 
-    this.managerNotificationsUser?.addNotificationComment(post, text);
+    this.managerNotificationsUser?.addNotificationComment(post, comment);
     this.managerContent?.incrementCounterCommentLocally(post.id);
 
     await updateDoc(doc(this.db, stateCollections.posts, post.id), {
