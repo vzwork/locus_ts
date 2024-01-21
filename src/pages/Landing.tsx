@@ -23,6 +23,7 @@ import ManagerAccount from "../data/_1_ManagerAccount/ManagerAccount";
 import PersonIcon from "@mui/icons-material/Person";
 import { useState } from "react";
 import { idRoot } from "../data/db";
+import { ButtonSignedInBig } from "../components/ButtonSignedIn/ButtonSignedIn";
 
 export default function Landing() {
   const account = useAccount();
@@ -68,7 +69,7 @@ export default function Landing() {
                   {themeMode === "light" ? <LightModeIcon /> : <DarkModeIcon />}
                 </IconButton>
                 {account ? (
-                  <AccountAuthenticated />
+                  <ButtonSignedInBig />
                 ) : (
                   <ButtonGroup>
                     <Button
@@ -100,43 +101,6 @@ export default function Landing() {
           root channel
         </Button>
       </Box>
-    </>
-  );
-}
-
-function AccountAuthenticated() {
-  const managerAccount = ManagerAccount;
-  const [open, setOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-    setOpen(false);
-  };
-
-  const handleSignOut = () => {
-    managerAccount.setAccount(null);
-  };
-
-  return (
-    <>
-      <Fab
-        variant="extended"
-        size="small"
-        onClick={handleClick}
-        color="secondary"
-      >
-        <PersonIcon />
-        account
-      </Fab>
-      <Menu open={open} anchorEl={anchorEl} onClose={handleClose}>
-        <MenuItem onClick={handleSignOut}>sign out</MenuItem>
-      </Menu>
     </>
   );
 }

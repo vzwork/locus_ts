@@ -37,6 +37,13 @@ class ManagerCompetencyUser {
 
   private constructor() {
     // Private constructor to prevent instantiation from outside
+    const minutes = 1;
+    const minutesToMillis = 1000 * 60 * minutes;
+
+    setInterval(() => {
+      this.counterTimeSpentChannel();
+      this.counterQueryIdsChannelsMostTimeSpent(this.account);
+    }, minutesToMillis);
   }
 
   public static getInstance(): ManagerCompetencyUser {
@@ -63,8 +70,8 @@ class ManagerCompetencyUser {
 
   private async counterQueryIdsChannelsMostTimeSpent(account: IAccount | null) {
     if (!account) return;
-
     if (!this.db || !this.account) return;
+
     const q = query(
       collection(this.db, stateCollections.competencyUser),
       where("idUser", "==", this.account.id),
@@ -81,90 +88,50 @@ class ManagerCompetencyUser {
     });
     this.competencyChannelsMostTimeSpent = competencyNewOrder;
     this.notifyListenersCompetencyChannelsMostTimeSpent();
-
-    const minutes = 1;
-
-    const minutesToMillis = 1000 * 60 * minutes;
-
-    const idNewCounter = setInterval(async () => {
-      if (!this.db || !this.account) return;
-      const q = query(
-        collection(this.db, stateCollections.competencyUser),
-        where("idUser", "==", this.account.id),
-        orderBy("minutesSpent", "desc"),
-        limit(10)
-      );
-
-      const querySnapshot = await getDocs(q);
-
-      const competencyNewOrder: ICompetency[] = [];
-      querySnapshot.forEach((doc) => {
-        const competency = doc.data() as ICompetency;
-        competencyNewOrder.push(competency);
-      });
-      this.competencyChannelsMostTimeSpent = competencyNewOrder;
-      this.notifyListenersCompetencyChannelsMostTimeSpent();
-    }, minutesToMillis);
-
-    if (this.idOldCounterQueryIdsChannelsMostTimeSpent) {
-      clearInterval(this.idOldCounterQueryIdsChannelsMostTimeSpent);
-    }
-
-    this.idOldCounterQueryIdsChannelsMostTimeSpent = idNewCounter;
   }
 
   private async counterTimeSpentChannel() {
-    const idChannelCurrentTimerRunning = this.channelCurrent?.id;
-    const minutes = 1;
-    const minutesToMillis = 1000 * 60 * minutes;
+    if (!this.channelCurrent?.id) return;
 
-    const idNewCounter = setInterval(async () => {
-      if (!this.db || !this.account || !idChannelCurrentTimerRunning) return;
-      updateDoc(
-        doc(
-          this.db,
-          stateCollections.competencyUser,
-          this.account.id + idChannelCurrentTimerRunning
-        ),
-        {
-          minutesSpent: increment(minutes),
+    if (!this.db || !this.account || !this.channelCurrent?.id) return;
+    updateDoc(
+      doc(
+        this.db,
+        stateCollections.competencyUser,
+        this.account.id + this.channelCurrent?.id
+      ),
+      {
+        minutesSpent: increment(1),
+      }
+    )
+      .catch((error) => {
+        if (!this.db || !this.account || !this.channelCurrent?.id) return;
+        if (error.code === "not-found") {
+          const newCompetencyDoc: ICompetency = {
+            version: VERSION_COMPETENCY,
+            idUser: this.account.id,
+            idChannel: this.channelCurrent?.id,
+            idsBooks: [],
+            idsStars: [],
+            minutesSpent: 5,
+            competencyIntrinsic: 0,
+            competencyInheritedChildren: 0,
+            competencyInheritedParent: 0,
+            competencyCumulative: 0,
+          };
+          setDoc(
+            doc(
+              this.db,
+              stateCollections.competencyUser,
+              this.account.id + this.channelCurrent?.id
+            ),
+            newCompetencyDoc
+          );
         }
-      )
-        .catch((error) => {
-          if (!this.db || !this.account || !idChannelCurrentTimerRunning)
-            return;
-          if (error.code === "not-found") {
-            const newCompetencyDoc: ICompetency = {
-              version: VERSION_COMPETENCY,
-              idUser: this.account.id,
-              idChannel: idChannelCurrentTimerRunning,
-              idsBooks: [],
-              idsStars: [],
-              minutesSpent: 5,
-              competencyIntrinsic: 0,
-              competencyInheritedChildren: 0,
-              competencyInheritedParent: 0,
-              competencyCumulative: 0,
-            };
-            setDoc(
-              doc(
-                this.db,
-                stateCollections.competencyUser,
-                this.account.id + idChannelCurrentTimerRunning
-              ),
-              newCompetencyDoc
-            );
-          }
-        })
-        .then(() => {
-          // console.log("updated competency time spent");
-        });
-    }, minutesToMillis);
-
-    if (this.idOldCounterTimeSpentChannel) {
-      clearInterval(this.idOldCounterTimeSpentChannel);
-    }
-    this.idOldCounterTimeSpentChannel = idNewCounter;
+      })
+      .then(() => {
+        // console.log("updated competency time spent");
+      });
   }
 
   // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----

@@ -46,6 +46,7 @@ import usePosts from "../data/_9_ManagerContent/usePosts";
 import Post from "../components/Post/Post";
 import ButtonNotifications from "../components/ButtonNotifications/ButtonNotifications";
 import WindowChannelsMostTimeSpent from "../components/WindowChannelsMostTimeSpent/WindowChannelsMostTimeSpent";
+import { ButtonSignedInSmall } from "../components/ButtonSignedIn/ButtonSignedIn";
 
 function formatNumber(num: number) {
   if (num < 1000) {
@@ -997,13 +998,7 @@ function ChannelsNavigation() {
           <EmailOutlinedIcon />
         </IconButton>
         <ButtonNotifications />
-        <IconButton
-          onClick={() => {
-            navigate("/");
-          }}
-        >
-          {account ? <ManageAccountsIcon /> : <PersonAddIcon />}
-        </IconButton>
+        <ButtonSignedInSmall />
       </Box>
     </>
   );

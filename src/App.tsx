@@ -23,6 +23,7 @@ import ManagerTraceUser from "./data/_4_ManagerTraceUser/ManagerTraceUser";
 import ManagerComments from "./data/_10_ManagerComments/ManagerComments";
 import ManagerNotificationsUser from "./data/_3_ManagerNotificationsUser/ManagerNotificationsUser";
 import ManagerCompetencyUser from "./data/_6_ManagerCompetencyUser/ManagerCompetencyUser";
+import Account from "./pages/Account";
 
 const WrapperBackground = () => {
   return (
@@ -40,6 +41,7 @@ const router = createBrowserRouter(
         <Route path="/" element={<Landing />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/account" element={<Account />} />
         <Route path="/resetpassword" element={<ResetPassword />} />
         {/* </Route>
       <Route> */}
