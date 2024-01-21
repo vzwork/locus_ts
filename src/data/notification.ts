@@ -1,4 +1,5 @@
 interface INotifaction {
+  version: string;
   idSender: string;
   idPost: string;
   idChannelOrigin: string;

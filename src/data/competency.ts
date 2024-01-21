@@ -1,4 +1,5 @@
 interface ICompetency {
+  version: string;
   idUser: string;
   idChannel: string;
   idsStars: string[];

@@ -22,29 +22,8 @@ import {
   onAuthStateChanged,
   signOut,
 } from "firebase/auth";
-import { sign } from "crypto";
 
-// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-// Communications between manager and React Components
-//
-// Component -> Manager
-// - Component calls a method on the manager
-//
-// Manager -> Component
-// - A component uses a hook to subscribe to a piece of state
-// - A hook uses subscriber + notifier pattern to update the component
-// - Manager keeps track of all hooks and notifies them when a change occurs
-// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-
-// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
-// Account manager keeps track of all user account information
-//
-// - Email
-// - Username
-// - First Name
-// - Last Name
-// - Profile Picture
-// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+const VERSION_ACCOUNT = "1.0.0";
 
 class ManagerAccount {
   // singleton

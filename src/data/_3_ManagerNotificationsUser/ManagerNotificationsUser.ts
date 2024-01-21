@@ -16,6 +16,8 @@ import { stateCollections } from "../db";
 import { IPost } from "../post";
 import { IComment } from "../comment";
 
+const VERSION_NOTIFICATION = "1.0.0";
+
 class ManagerNotificationsUser {
   private static instance: ManagerNotificationsUser;
 
@@ -84,6 +86,7 @@ class ManagerNotificationsUser {
     if (this.account.id === post.idCreator) return;
     if (!this.db) return;
     const newNotification: INotifaction = {
+      version: VERSION_NOTIFICATION,
       idSender: this.account.id,
       idPost: post.id,
       idChannelOrigin: post.navigation.idChannelOrigin,

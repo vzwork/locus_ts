@@ -21,6 +21,8 @@ import { CompetencyRates, ICompetency } from "../competency";
 import ManagerChannels from "../_7_ManagerChannels/ManagerChannels";
 import { IChannel } from "../channel";
 
+const VERSION_COMPETENCY = "1.0.0";
+
 class ManagerCompetencyUser {
   private static instance: ManagerCompetencyUser;
   private db: Firestore | null = null;
@@ -133,6 +135,7 @@ class ManagerCompetencyUser {
             return;
           if (error.code === "not-found") {
             const newCompetencyDoc: ICompetency = {
+              version: VERSION_COMPETENCY,
               idUser: this.account.id,
               idChannel: idChannelCurrentTimerRunning,
               idsBooks: [],
@@ -182,6 +185,7 @@ class ManagerCompetencyUser {
       if (!this.db || !this.account) return;
       if (error.code === "not-found") {
         const newCompetencyDoc: ICompetency = {
+          version: VERSION_COMPETENCY,
           idUser: post.idCreator,
           idChannel: post.navigation.idChannelOrigin,
           idsBooks: [],
@@ -220,6 +224,7 @@ class ManagerCompetencyUser {
       if (!this.db || !this.account) return;
       if (error.code === "not-found") {
         const newCompetencyDoc: ICompetency = {
+          version: VERSION_COMPETENCY,
           idUser: post.idCreator,
           idChannel: post.navigation.idChannelOrigin,
           idsBooks: [this.account.id],

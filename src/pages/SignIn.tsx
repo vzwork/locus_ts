@@ -25,6 +25,8 @@ import { IAccount } from "../data/account";
 import ManagerAccount from "../data/_1_ManagerAccount/ManagerAccount";
 import { stateCollections } from "../data/db";
 
+const VERSION_ACCOUNT = "1.0.0";
+
 export default function SignIn() {
   const db = getFirestore();
   const auth = getAuth();
@@ -93,6 +95,7 @@ export default function SignIn() {
 
     if (!docSnap?.data()) {
       const account: IAccount = {
+        version: VERSION_ACCOUNT,
         email: res.user.email as string,
         id: res.user.uid as string,
         username: "user",
@@ -102,6 +105,9 @@ export default function SignIn() {
         role: "user",
         createdAt: Date.now(),
         updatedAt: Date.now(),
+        countStars: 0,
+        countBooks: 0,
+        countPosts: 0,
       };
       managerAccount.setAccount(account);
       navigate("/signup");

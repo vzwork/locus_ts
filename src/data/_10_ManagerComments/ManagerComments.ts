@@ -17,6 +17,8 @@ import ManagerContent from "../_9_ManagerContent/ManagerContent";
 import { IPost } from "../post";
 import ManagerNotificationsUser from "../_3_ManagerNotificationsUser/ManagerNotificationsUser";
 
+const VERSION_COMMENT = "1.0.0";
+
 class ManagerComments {
   private static instance: ManagerComments;
   private account: IAccount | null = null;
@@ -69,6 +71,7 @@ class ManagerComments {
     if (!this.account) return;
 
     const comment = {
+      version: VERSION_COMMENT,
       id: this.account.id + Date.now(),
       text,
       idAuthor: this.account?.id ?? "",
@@ -121,6 +124,7 @@ class ManagerComments {
     if (!this.account) return;
 
     const comment = {
+      version: VERSION_COMMENT,
       id: this.account.id + Date.now(),
       text,
       idAuthor: this.account?.id ?? "",

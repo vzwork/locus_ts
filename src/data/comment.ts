@@ -1,4 +1,5 @@
 interface IComment {
+  version: string;
   id: string;
   text: string;
   idAuthor: string;

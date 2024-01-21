@@ -22,6 +22,8 @@ import useAccount from "../data/_1_ManagerAccount/useAccount";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { stateCollections } from "../data/db";
 
+const VERSION_ACCOUNT = "1.0.0";
+
 export default function SignUp() {
   const managerAccount = ManagerAccount;
   const db = getFirestore();
@@ -57,6 +59,7 @@ export default function SignUp() {
     if (!res) return;
 
     const newAccount: IAccount = {
+      version: VERSION_ACCOUNT,
       email: email,
       id: res.user.uid,
       username: "user",
@@ -66,6 +69,9 @@ export default function SignUp() {
       role: "user",
       createdAt: Date.now(),
       updatedAt: Date.now(),
+      countStars: 0,
+      countBooks: 0,
+      countPosts: 0,
     };
 
     managerAccount.setAccount(newAccount);
