@@ -45,6 +45,7 @@ import useAccount from "../data/_1_ManagerAccount/useAccount";
 import usePosts from "../data/_9_ManagerContent/usePosts";
 import Post from "../components/Post/Post";
 import ButtonNotifications from "../components/ButtonNotifications/ButtonNotifications";
+import WindowChannelsMostTimeSpent from "../components/WindowChannelsMostTimeSpent/WindowChannelsMostTimeSpent";
 
 function formatNumber(num: number) {
   if (num < 1000) {
@@ -183,7 +184,7 @@ function ChannelsDesktop() {
             </Grid>
             <Grid item md={3} lg={2.5} xl={2}>
               <Box p={1} sx={{ position: "sticky", top: "0" }}>
-                side
+                <WindowChannelsMostTimeSpent />
               </Box>
             </Grid>
           </Grid>

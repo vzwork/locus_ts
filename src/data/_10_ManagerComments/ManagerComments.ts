@@ -22,6 +22,7 @@ class ManagerComments {
   private account: IAccount | null = null;
   private comments: Map<string, IComment[]> = new Map();
   private db: Firestore | null = null;
+  private idsPostsListening: Set<string> = new Set();
   private listenersComments: Map<
     string,
     ((comments: ICommentBuilt[]) => void)[]
@@ -261,7 +262,6 @@ class ManagerComments {
     listener: (comments: ICommentBuilt[]) => void
   ): (comments: ICommentBuilt[]) => void {
     if (!this.db) return listener;
-
     const listeners = this.listenersComments.get(id);
     if (listeners) {
       listeners.push(listener);
@@ -269,13 +269,20 @@ class ManagerComments {
       this.listenersComments.set(id, [listener]);
     }
 
-    if (!this.subscribersComments.has(id)) {
+    // console.log(this.subscribersComments);
+    // console.log(this.listenersComments);
+    // console.log(this.idsPostsListening);
+
+    if (!this.subscribersComments.has(id) && !this.idsPostsListening.has(id)) {
+      this.idsPostsListening.add(id);
+      console.log("oh no");
       const unsub = onSnapshot(
         doc(this.db, stateCollections.comments, id),
         (doc) => {
           if (!doc.exists()) return;
           const data = doc.data();
           if (!data) return;
+          console.log("read");
           this.commentsUpdated(data);
         }
       );
@@ -291,6 +298,11 @@ class ManagerComments {
       return;
     }
     const comments: IComment[] = data.comments as IComment[];
+    if (
+      JSON.stringify(this.comments.get(data.idPost)) ===
+      JSON.stringify(comments)
+    )
+      return;
     this.comments.set(data.idPost, comments);
     this.buildComments(data.idPost, comments);
   }
@@ -376,9 +388,18 @@ class ManagerComments {
     if (!this.db) return;
 
     const listeners = this.listenersComments.get(id);
+    // console.log(listeners);
+
     if (!listeners) return;
-    if (listeners.length === 1) {
+
+    // DON'T CHANGE THIS (listeners.length === 10)
+    // if listeners.length === 1
+    // CAUSES infinite loop in react
+    // continuous reads and writes to Firestore.
+
+    if (listeners.length === 10) {
       this.listenersComments.delete(id);
+      this.idsPostsListening.delete(id);
       const unsub = this.subscribersComments.get(id);
       if (unsub) {
         unsub();
