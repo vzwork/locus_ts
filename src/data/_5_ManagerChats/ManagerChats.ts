@@ -10,6 +10,7 @@ import {
   updateDoc,
   arrayUnion,
   getDoc,
+  arrayRemove,
 } from "firebase/firestore";
 import ManagerAccount from "../_1_ManagerAccount/ManagerAccount";
 import { IAccount } from "../account";
@@ -35,6 +36,7 @@ class ManagerChats {
   private activeMessages: IMessage[] = [];
 
   // state
+  private subscriberChatCurrent: (() => void) | null = null;
   private idChatCurrent: string | null = null;
   private listenersOrganizationChats: ((
     organizationChats: IOrganizationChats
@@ -69,9 +71,7 @@ class ManagerChats {
           const organizationChats = doc.data() as IOrganizationChats;
           this.organizationChats = organizationChats;
           this.notifyListenersOrganizationChats();
-          if (this.idChatCurrent) {
-            this.setChatCurrent(this.idChatCurrent);
-          }
+          this.setChatCurrent(this.idChatCurrent);
         }
       );
     });
@@ -95,23 +95,59 @@ class ManagerChats {
 
   // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
   // user actions
-  public async setChatCurrent(idChat: string) {
-    this.idChatCurrent = idChat;
-
+  public async acceptChat(idChat: string) {
     if (!this.db) return;
     if (!this.account) return;
 
-    onSnapshot(
-      doc(this.db, stateCollections.messages, idChat),
-      (doc) => {
-        const messages = doc.data()?.messages as IMessage[];
-        this.activeMessages = messages;
-        this.notifyListenersActiveChat();
-      },
-      (error) => {
-        console.error(error);
+    // update this users chats
+    await updateDoc(
+      doc(this.db, stateCollections.organizationChats, this.account.id),
+      {
+        idsRequestsChats: arrayRemove(idChat),
+        idsChats: arrayUnion(idChat),
       }
     );
+  }
+
+  public async setChatCurrent(idChat: string | null) {
+    // console.log("setChatCurrent", idChat);
+    this.idChatCurrent = idChat;
+    if (!idChat) {
+      if (this.subscriberChatCurrent) {
+        this.subscriberChatCurrent();
+      }
+      this.activeMessages = [];
+      this.notifyListenersActiveChat();
+    } else {
+      if (!this.db) return;
+      if (!this.account) return;
+
+      const unsubscribe = onSnapshot(
+        doc(this.db, stateCollections.messages, idChat),
+        (doc) => {
+          const messages = doc.data()?.messages as IMessage[];
+          this.activeMessages = messages;
+          this.notifyListenersActiveChat();
+        },
+        (error) => {
+          console.error(error);
+        }
+      );
+
+      this.subscriberChatCurrent = unsubscribe;
+
+      // update organization chats
+      if (this.organizationChats?.idsChatsNewMessages.includes(idChat)) {
+        // console.log("this should trigger ti");
+        await updateDoc(
+          doc(this.db, stateCollections.organizationChats, this.account.id),
+          {
+            idsChatsNewMessages: arrayRemove(idChat),
+            idsChats: arrayUnion(idChat),
+          }
+        );
+      }
+    }
   }
 
   public async sendMessage(idChat: string, message: string) {
@@ -139,11 +175,29 @@ class ManagerChats {
         messages: arrayUnion(messageChat),
       });
     }
+
+    const idUserTarget = idChat.replace(this.account.id, "");
+
+    // update organization chats
+    const docSnapOther = await getDoc(
+      doc(this.db, stateCollections.organizationChats, idUserTarget)
+    );
+    const organizationChatsOther = docSnapOther.data() as IOrganizationChats;
+    if (!organizationChatsOther.idsRequestsChats.includes(idChat)) {
+      await updateDoc(
+        doc(this.db, stateCollections.organizationChats, idUserTarget),
+        {
+          idsChatsNewMessages: arrayUnion(idChat),
+          idsChats: arrayRemove(idChat),
+        }
+      );
+    }
   }
 
   public async createChat(idUserTarget: string) {
     if (!this.db) return;
     if (!this.account) return;
+    await this.checkOrganizationChatsExists(this.account.id);
     await this.checkOrganizationChatsExists(idUserTarget);
 
     const idUserA =

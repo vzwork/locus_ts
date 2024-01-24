@@ -30,7 +30,7 @@ const themeLight = createTheme({
       paper: "#eee",
       default: "#c9d0d1",
       transperent: "rgba(255, 255, 255, 0.6)",
-      transperentHover: "rgba(255, 255, 255, 0.5)",
+      transperentHover: "rgba(255, 255, 255, 0.4)",
     },
     primary: {
       main: "#577894",

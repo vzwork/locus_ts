@@ -1,9 +1,9 @@
 import {
   Box,
   Button,
+  Container,
   Grid,
-  Menu,
-  MenuItem,
+  IconButton,
   TextField,
   useTheme,
 } from "@mui/material";
@@ -15,7 +15,9 @@ import { useEffect, useRef, useState } from "react";
 import ManagerChats from "../data/_5_ManagerChats/ManagerChats";
 import useOrganizationChats from "../data/_5_ManagerChats/useOrganizationChats";
 import useActiveChat from "../data/_5_ManagerChats/useActiveChat";
-import { render } from "@testing-library/react";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import { IAccount } from "../data/account";
 
 export default function Chats() {
   const managerChats = ManagerChats;
@@ -25,6 +27,8 @@ export default function Chats() {
   useEffect(() => {
     if (params.idChat) {
       managerChats.setChatCurrent(params.idChat);
+    } else {
+      managerChats.setChatCurrent(null);
     }
   }, [params.idChat]);
 
@@ -53,14 +57,16 @@ function ChatsDesktop() {
       <></>
       <></>
       <Box>
-        <Grid container spacing="0.5rem">
-          <Grid item xs={4} lg={3} xl={2}>
-            <NavigationChats />
+        <Container>
+          <Grid container spacing="0.5rem">
+            <Grid item xs={4} lg={3} xl={2}>
+              <NavigationChats />
+            </Grid>
+            <Grid item xs={8} lg={9} xl={10}>
+              <Chat />
+            </Grid>
           </Grid>
-          <Grid item xs={8} lg={9} xl={10}>
-            <Chat />
-          </Grid>
-        </Grid>
+        </Container>
       </Box>
     </>
   );
@@ -75,71 +81,54 @@ function ChatsMobile() {
   );
 }
 
-interface IChatOther {
-  idChat: string;
-  username: string;
-}
-
 function NavigationChats() {
   const params = useParams();
   const navigate = useNavigate();
   const organizationChats = useOrganizationChats();
   const account = useAccount();
   const managerAccount = ManagerAccount;
-
-  const [chatsNewMessagesOther, setChatsNewMessagesOther] = useState<
-    IChatOther[]
-  >([]);
-  const [chatsOther, setChatsOther] = useState<IChatOther[]>([]);
-  const [chatsRequestsOther, setChatsRequestsOther] = useState<IChatOther[]>(
-    []
-  );
+  const managerChats = ManagerChats;
+  const [accounts, setAccounts] = useState<IAccount[]>([]);
 
   useEffect(() => {
     if (!account) return;
+    if (!organizationChats) return;
 
-    organizationChats?.idsChatsNewMessages?.map(async (idChat) => {
-      const idOther = idChat.replace(account.id, "");
-      const accountOther = await managerAccount.getAccountOptimized(idOther);
-      if (!accountOther) console.log("couldn't find account other");
-      if (!accountOther) return;
-      if (chatsNewMessagesOther.find((chat) => chat.idChat === idChat)) return;
-      setChatsNewMessagesOther((prev) => [
-        ...prev,
-        { idChat, username: accountOther.username },
-      ]);
+    organizationChats.idsChatsNewMessages.map(async (idChat) => {
+      const idOtherUser = idChat.replace(account.id, "");
+      const accountOtherUser = await managerAccount.getAccountOptimized(
+        idOtherUser
+      );
+      if (accounts.find((account) => account.id === idOtherUser)) return;
+      if (accountOtherUser) {
+        setAccounts([...accounts, accountOtherUser]);
+      }
     });
-
-    organizationChats?.idsChats?.map(async (idChat) => {
-      const idOther = idChat.replace(account.id, "");
-      const accountOther = await managerAccount.getAccountOptimized(idOther);
-      if (!accountOther) console.log("couldn't find account other");
-      if (!accountOther) return;
-      if (chatsOther.find((chat) => chat.idChat === idChat)) return;
-      setChatsOther((prev) => [
-        ...prev,
-        { idChat, username: accountOther.username },
-      ]);
+    organizationChats.idsChats.map(async (idChat) => {
+      const idOtherUser = idChat.replace(account.id, "");
+      const accountOtherUser = await managerAccount.getAccountOptimized(
+        idOtherUser
+      );
+      if (accounts.find((account) => account.id === idOtherUser)) return;
+      if (accountOtherUser) {
+        setAccounts([...accounts, accountOtherUser]);
+      }
     });
-
-    organizationChats?.idsRequestsChats?.map(async (idChat) => {
-      const idOther = idChat.replace(account.id, "");
-      const accountOther = await managerAccount.getAccountOptimized(idOther);
-      if (!accountOther) console.log("couldn't find account other");
-      if (!accountOther) return;
-      if (chatsRequestsOther.find((chat) => chat.idChat === idChat)) return;
-      setChatsRequestsOther((prev) => [
-        ...prev,
-        { idChat, username: accountOther.username },
-      ]);
+    organizationChats.idsRequestsChats.map(async (idChat) => {
+      const idOtherUser = idChat.replace(account.id, "");
+      const accountOtherUser = await managerAccount.getAccountOptimized(
+        idOtherUser
+      );
+      if (accounts.find((account) => account.id === idOtherUser)) return;
+      if (accountOtherUser) {
+        setAccounts([...accounts, accountOtherUser]);
+      }
     });
   }, [organizationChats, account]);
 
   useEffect(() => {
-    // console.log(chatsNewMessagesOther);
-    // console.log(chatsOther);
-    // console.log(chatsRequestsOther);
-  }, [chatsNewMessagesOther, chatsOther, chatsRequestsOther]);
+    // console.log(accounts);
+  }, [accounts]);
 
   return (
     <>
@@ -159,62 +148,85 @@ function NavigationChats() {
           home
         </Button>
         <Box sx={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          {chatsNewMessagesOther.map((chat, idx) => {
+          {organizationChats?.idsChatsNewMessages?.length || 0 > 0
+            ? "new messages:"
+            : null}
+          {organizationChats?.idsChatsNewMessages?.map((idChat, idx) => {
             return (
               <Button
-                color={params.idChat === chat.idChat ? "inherit" : "info"}
+                color={params.idChat === idChat ? "inherit" : "info"}
                 key={idx}
                 fullWidth
                 variant="outlined"
                 onClick={() => {
-                  navigate(`/chats/${chat.idChat}`);
+                  navigate(`/chats/${idChat}`);
                 }}
                 sx={{
                   backdropFilter: "blur(2px)",
                 }}
               >
-                {chat.username}
+                {accounts.find(
+                  (accountOther) =>
+                    accountOther.id === idChat.replace(account?.id || "", "")
+                )?.username || "..."}
               </Button>
             );
           })}
         </Box>
         <Box sx={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          {chatsOther.map((chat, idx) => {
+          chats:
+          {organizationChats?.idsChats?.map((idChat, idx) => {
             return (
               <Button
-                color={params.idChat === chat.idChat ? "inherit" : "info"}
+                color={params.idChat === idChat ? "inherit" : "info"}
                 key={idx}
                 fullWidth
                 variant="outlined"
                 onClick={() => {
-                  navigate(`/chats/${chat.idChat}`);
+                  navigate(`/chats/${idChat}`);
                 }}
                 sx={{
                   backdropFilter: "blur(2px)",
                 }}
               >
-                {chat.username}
+                {accounts.find(
+                  (accountOther) =>
+                    accountOther.id === idChat.replace(account?.id || "", "")
+                )?.username || "..."}
               </Button>
             );
           })}
         </Box>
         <Box sx={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          {chatsRequestsOther.map((chat, idx) => {
+          requests:
+          {organizationChats?.idsRequestsChats?.map((idChat, idx) => {
             return (
-              <Button
-                color={params.idChat === chat.idChat ? "inherit" : "info"}
-                key={idx}
-                fullWidth
-                variant="outlined"
-                onClick={() => {
-                  navigate(`/chats/${chat.idChat}`);
-                }}
-                sx={{
-                  backdropFilter: "blur(2px)",
-                }}
-              >
-                {chat.username}
-              </Button>
+              <Box sx={{ display: "flex" }} key={idx}>
+                <Button
+                  color={params.idChat === idChat ? "inherit" : "info"}
+                  key={idx}
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => {
+                    navigate(`/chats/${idChat}`);
+                  }}
+                  sx={{
+                    backdropFilter: "blur(2px)",
+                  }}
+                >
+                  {accounts.find(
+                    (accountOther) =>
+                      accountOther.id === idChat.replace(account?.id || "", "")
+                  )?.username || "..."}
+                </Button>
+                <IconButton
+                  onClick={() => {
+                    managerChats.acceptChat(idChat);
+                  }}
+                >
+                  <AddCircleOutlineIcon />
+                </IconButton>
+              </Box>
             );
           })}
         </Box>
@@ -234,7 +246,8 @@ function Chat() {
   const [text, setText] = useState<string>("");
   const [shiftDown, setShiftDown] = useState<boolean>(false);
 
-  let dateLastRendered = 0;
+  let datePreviousPreviousRendered = new Date();
+  let datePreviousRendered = new Date();
 
   // Q: how to make it so that at the beginning it is scrolled al the way down?
   // A: use a ref and scroll to the bottom of the ref
@@ -258,7 +271,7 @@ function Chat() {
           gap: "1rem",
         }}
       >
-        <Box>
+        <Box pr="2rem">
           <TextField
             placeholder="return - send"
             label="message..."
@@ -297,8 +310,11 @@ function Chat() {
           ref={messagesRef}
           sx={{
             flex: "1",
-            overflowY: "auto",
-            height: "50vh",
+            overflowY: "scroll",
+            height: "100%",
+            paddingRight: "2rem",
+            display: "flex",
+            flexDirection: "column-reverse",
           }}
         >
           {messages?.length === 0 ? (
@@ -323,20 +339,21 @@ function Chat() {
                 ?.sort((a, b) => b.timestampCreated - a.timestampCreated)
                 .map((message) => {
                   let renderDate = false;
-                  const lastRenderedDate = new Date(dateLastRendered);
                   const dateMessage = new Date(message.timestampCreated);
-                  if (lastRenderedDate.getDay() !== dateMessage.getDay()) {
+                  if (datePreviousRendered.getDay() !== dateMessage.getDay()) {
                     renderDate = true;
-                    dateLastRendered = message.timestampCreated;
                   }
+                  datePreviousPreviousRendered = datePreviousRendered;
+                  datePreviousRendered = dateMessage;
 
                   return (
                     <Box key={message.timestampCreated}>
                       <Box sx={{ display: "flex", justifyContent: "center" }}>
                         {renderDate ? (
                           <Box>
-                            {dateMessage.getMonth() + 1}/{dateMessage.getDate()}
-                            /{dateMessage.getFullYear()}
+                            {datePreviousPreviousRendered.getMonth() + 1}/
+                            {datePreviousPreviousRendered.getDate()}/
+                            {datePreviousPreviousRendered.getFullYear()}
                           </Box>
                         ) : null}
                       </Box>
@@ -360,6 +377,15 @@ function Chat() {
                     </Box>
                   );
                 })}
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                {datePreviousRendered ? (
+                  <Box>
+                    {datePreviousRendered.getMonth() + 1}/
+                    {datePreviousRendered.getDate()}/
+                    {datePreviousRendered.getFullYear()}
+                  </Box>
+                ) : null}
+              </Box>
             </Box>
           )}
         </Box>
