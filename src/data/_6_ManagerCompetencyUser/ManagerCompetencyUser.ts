@@ -29,19 +29,19 @@ class ManagerCompetencyUser {
   private account: IAccount | null = null;
   private channelCurrent: IChannel | null = null;
   private competencyChannelsMostTimeSpent: ICompetency[] = [];
-  private idOldCounterTimeSpentChannel: NodeJS.Timer | null = null;
-  private idOldCounterQueryIdsChannelsMostTimeSpent: NodeJS.Timer | null = null;
   private listenersCompetencyChannelsMostTimeSpent: ((
     competencyChannelsMostTimeSpent: ICompetency[]
   ) => void)[] = [];
 
   private constructor() {
     // Private constructor to prevent instantiation from outside
-    const minutes = 1;
+    const minutes = 3;
     const minutesToMillis = 1000 * 60 * minutes;
 
     setInterval(() => {
       this.counterTimeSpentChannel();
+    }, minutesToMillis);
+    setInterval(() => {
       this.counterQueryIdsChannelsMostTimeSpent(this.account);
     }, minutesToMillis);
   }

@@ -22,6 +22,7 @@ import {
   onAuthStateChanged,
   signOut,
 } from "firebase/auth";
+import { time } from "console";
 
 const VERSION_ACCOUNT = "1.0.0";
 
@@ -76,6 +77,80 @@ class ManagerAccount {
 
   // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
   // actions
+  public async getAccountOptimized(
+    idAccount: string
+  ): Promise<IAccount | null> {
+    const accountsString = localStorage.getItem("accounts");
+    const timestampUpdatedAccountString = localStorage.getItem(
+      "timestampUpdatedAccount"
+    );
+
+    if (accountsString === null || timestampUpdatedAccountString === null) {
+      localStorage.setItem("accounts", JSON.stringify({}));
+      localStorage.setItem("timestampUpdatedAccount", JSON.stringify({}));
+      return this.getAccount(idAccount);
+    }
+
+    const accounts = JSON.parse(accountsString);
+    const account = accounts[idAccount];
+
+    const timestampUpdatedAccount = JSON.parse(timestampUpdatedAccountString);
+    const timestampUpdated = timestampUpdatedAccount[idAccount];
+
+    if (
+      timestampUpdated === undefined ||
+      timestampUpdated < Date.now() - 1000 * 60 * 60 * 48
+    ) {
+      return this.getAccount(idAccount);
+    }
+
+    if (account === undefined) {
+      return this.getAccount(idAccount);
+    }
+
+    return account;
+  }
+
+  private async getAccount(idAccount: string): Promise<IAccount | null> {
+    if (!this.db) return null;
+
+    const docSnap = await getDoc(
+      doc(this.db, stateCollections.accounts, idAccount)
+    ).catch((error) => {
+      console.error(error.message);
+      console.error(error.code);
+    });
+
+    if (!docSnap || !docSnap.exists()) return null;
+
+    this.optimizeAccount(docSnap.data() as IAccount);
+
+    return docSnap.data() as IAccount;
+  }
+
+  private optimizeAccount(account: IAccount) {
+    const accountsString = localStorage.getItem("accounts");
+    const timestampUpdatedAccountString = localStorage.getItem(
+      "timestampUpdatedAccount"
+    );
+
+    if (accountsString === null || timestampUpdatedAccountString === null) {
+      localStorage.setItem("accounts", JSON.stringify({}));
+      localStorage.setItem("timestampUpdatedAccount", JSON.stringify({}));
+    }
+
+    const accounts = JSON.parse(accountsString!);
+    accounts[account.id] = account;
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+
+    const timestampUpdatedAccount = JSON.parse(timestampUpdatedAccountString!);
+    timestampUpdatedAccount[account.id] = Date.now();
+    localStorage.setItem(
+      "timestampUpdatedAccount",
+      JSON.stringify(timestampUpdatedAccount)
+    );
+  }
+
   public async setAccount(account: IAccount | null) {
     if (this.account === account) return;
     if (!this.db) return;

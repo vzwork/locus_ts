@@ -48,7 +48,7 @@ export default function WindowChannelsMostTimeSpent() {
         borderRadius="0.5rem"
       >
         <Box>
-          <Box>Most minutes spent</Box>
+          <Box>minutes spent</Box>
         </Box>
         <Box>
           <Box>

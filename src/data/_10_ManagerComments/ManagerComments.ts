@@ -279,7 +279,6 @@ class ManagerComments {
 
     if (!this.subscribersComments.has(id) && !this.idsPostsListening.has(id)) {
       this.idsPostsListening.add(id);
-      console.log("oh no");
       const unsub = onSnapshot(
         doc(this.db, stateCollections.comments, id),
         (doc) => {
@@ -291,6 +290,8 @@ class ManagerComments {
         }
       );
       this.subscribersComments.set(id, unsub);
+    } else {
+      this.buildComments(id, this.comments.get(id) ?? []);
     }
 
     return listener;

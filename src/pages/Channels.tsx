@@ -32,10 +32,6 @@ import NewspaperIcon from "@mui/icons-material/Newspaper";
 import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
 import PhotoCameraFrontIcon from "@mui/icons-material/PhotoCameraFront";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 
 import { IChannel } from "../data/channel";
 import ManagerContent from "../data/_9_ManagerContent/ManagerContent";
@@ -47,6 +43,7 @@ import Post from "../components/Post/Post";
 import ButtonNotifications from "../components/ButtonNotifications/ButtonNotifications";
 import WindowChannelsMostTimeSpent from "../components/WindowChannelsMostTimeSpent/WindowChannelsMostTimeSpent";
 import { ButtonSignedInSmall } from "../components/ButtonSignedIn/ButtonSignedIn";
+import ButtonChats from "../components/ButtonChats/ButtonChats";
 
 function formatNumber(num: number) {
   if (num < 1000) {
@@ -990,13 +987,7 @@ function ChannelsNavigation() {
         >
           <HomeIcon />
         </IconButton>
-        <IconButton
-          onClick={() => {
-            navigate("/");
-          }}
-        >
-          <EmailOutlinedIcon />
-        </IconButton>
+        <ButtonChats />
         <ButtonNotifications />
         <ButtonSignedInSmall />
       </Box>

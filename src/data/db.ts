@@ -11,6 +11,8 @@ const collectionsTest = {
   accounts: "testAccounts",
   notifications: "testNotifications",
   competencyUser: "testCompetencyUser",
+  organizationChats: "testOrganizationChats",
+  messages: "testMessages",
 };
 
 const storageTest = {
@@ -28,6 +30,8 @@ const collectionsProd = {
   accounts: "accounts",
   notifications: "notifications",
   competencyUser: "competencyUser",
+  organizationChats: "organizationChats",
+  messages: "messages",
 };
 
 const storageProd = {

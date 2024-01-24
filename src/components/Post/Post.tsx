@@ -4,6 +4,8 @@ import {
   Collapse,
   Divider,
   IconButton,
+  Menu,
+  MenuItem,
   TextField,
   useTheme,
 } from "@mui/material";
@@ -35,6 +37,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 import useComments from "../../data/_10_ManagerComments/useComments";
 import Article from "../Article/Article";
+import ManagerChats from "../../data/_5_ManagerChats/ManagerChats";
 
 export default function Post({
   post,
@@ -70,6 +73,10 @@ export default function Post({
   // post expansion logic
   const [expanded, setExpanded] = useState(propExpanded);
 
+  // user menu
+  const managerChats = ManagerChats;
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
   const handleClickBox = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (e.target !== refUser.current) {
       setExpanded(!expanded);
@@ -85,6 +92,9 @@ export default function Post({
         bgcolor={"background.transperent"}
         borderRadius="0.5rem"
         sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.5rem",
           backdropFilter: "blur(2px)",
           border: `2px solid ${theme.palette.info.main}`,
 
@@ -101,7 +111,42 @@ export default function Post({
         onClick={(e) => handleClickBox(e)}
       >
         <Box color="info.main" sx={{ display: "flex", alignItems: "center" }}>
-          <Box ref={refUser}>{post.nameCreator}</Box>
+          <Button
+            size="small"
+            variant="outlined"
+            color="info"
+            onClick={(e) => {
+              e.stopPropagation();
+              setAnchorEl(e.currentTarget);
+            }}
+            sx={{
+              borderRadius: "2rem",
+              backgroundColor: theme.palette.background.transperent,
+              textTransform: "none",
+            }}
+          >
+            {post.nameCreator}
+          </Button>
+          <Menu
+            open={!!anchorEl}
+            anchorEl={anchorEl}
+            onClose={(e) => {
+              setAnchorEl(null);
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <MenuItem
+              onClick={() => {
+                if (post.idCreator !== account?.id) {
+                  managerChats.createChat(post.idCreator);
+                }
+              }}
+            >
+              {post.idCreator !== account?.id ? "send message" : "this is you"}
+            </MenuItem>
+          </Menu>
           <Divider sx={{ flex: "1", marginX: "1rem" }} />
           <Box
             sx={{ display: "flex", alignItems: "center", gap: "0.2rem" }}

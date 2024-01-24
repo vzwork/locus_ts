@@ -23,7 +23,9 @@ import ManagerTraceUser from "./data/_4_ManagerTraceUser/ManagerTraceUser";
 import ManagerComments from "./data/_10_ManagerComments/ManagerComments";
 import ManagerNotificationsUser from "./data/_3_ManagerNotificationsUser/ManagerNotificationsUser";
 import ManagerCompetencyUser from "./data/_6_ManagerCompetencyUser/ManagerCompetencyUser";
-import Account from "./pages/Account";
+import Accounts from "./pages/Accounts";
+import ManagerChats from "./data/_5_ManagerChats/ManagerChats";
+import Chats from "./pages/Chats";
 
 const WrapperBackground = () => {
   return (
@@ -41,8 +43,10 @@ const router = createBrowserRouter(
         <Route path="/" element={<Landing />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/account" element={<Account />} />
+        <Route path="/accounts/:idAccount" element={<Accounts />} />
         <Route path="/resetpassword" element={<ResetPassword />} />
+        <Route path="/chats/:idChat" element={<Chats />} />
+        <Route path="/chats" element={<Chats />} />
         {/* </Route>
       <Route> */}
         <Route path="/channels/:idChannel" element={<Channels />}>
@@ -70,6 +74,8 @@ export default function App() {
   managerNotificationsUser.init();
   const managerCompetencyUser = ManagerCompetencyUser;
   managerCompetencyUser.init();
+  const managerChats = ManagerChats;
+  managerChats.init();
 
   return (
     <>
