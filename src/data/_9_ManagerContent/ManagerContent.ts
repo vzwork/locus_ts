@@ -22,9 +22,6 @@ import {
   ref,
   uploadBytes,
 } from "firebase/storage";
-import { types } from "util";
-import { channel } from "diagnostics_channel";
-import { stat } from "fs";
 import ManagerCompetencyUser from "../_6_ManagerCompetencyUser/ManagerCompetencyUser";
 
 function arraysEqual(a: any, b: any) {
@@ -53,6 +50,10 @@ class ManagerContent {
   private storage: FirebaseStorage | null = null;
 
   // state
+  private idUser: string | null = null;
+  private queryUsersPosts: boolean = false;
+  private queryUsersStars: boolean = false;
+  private queryUsersBooks: boolean = false;
   private listenersContent: ((posts: IPost[]) => void)[] = [];
   private content: IPost[] = [];
 
@@ -92,6 +93,27 @@ class ManagerContent {
 
   // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
   // actions order
+  public setQueryUsersPosts(idUser: string) {
+    this.idUser = idUser;
+    this.queryUsersPosts = true;
+    this.queryUsersStars = false;
+    this.queryUsersBooks = false;
+    this.queryContent();
+  }
+  public setQueryUsersStars(idUser: string) {
+    this.idUser = idUser;
+    this.queryUsersPosts = false;
+    this.queryUsersStars = true;
+    this.queryUsersBooks = false;
+    this.queryContent();
+  }
+  public setQueryUsersBooks(idUser: string) {
+    this.idUser = idUser;
+    this.queryUsersPosts = false;
+    this.queryUsersStars = false;
+    this.queryUsersBooks = true;
+    this.queryContent();
+  }
   public setTypesContentActive(types: string[]) {
     if (this.typesContentActive === types) return;
     if (arraysEqual(types, this.typesContentActive)) return;

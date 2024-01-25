@@ -44,6 +44,7 @@ const router = createBrowserRouter(
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/accounts/:idAccount" element={<Accounts />} />
+        <Route path="/account" element={<Accounts />} />
         <Route path="/resetpassword" element={<ResetPassword />} />
         <Route path="/chats/:idChat" element={<Chats />} />
         <Route path="/chats" element={<Chats />} />

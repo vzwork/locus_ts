@@ -5,6 +5,7 @@ import {
   doc,
   getDoc,
   getFirestore,
+  increment,
   setDoc,
   updateDoc,
 } from "firebase/firestore";
@@ -12,6 +13,8 @@ import ManagerAccount from "../_1_ManagerAccount/ManagerAccount";
 import { IAccount } from "../account";
 import { stateCollections } from "../db";
 import { error } from "console";
+import { IPost } from "../post";
+import { IStats } from "../stats";
 
 class ManagerTraceUser {
   private static instance: ManagerTraceUser;
@@ -19,11 +22,13 @@ class ManagerTraceUser {
   private account: IAccount | null = null;
 
   // state
+  private statsUser: IStats | null = null;
   private setStars: Set<string> = new Set();
   private setBooks: Set<string> = new Set();
   private setComments: Set<string> = new Set();
 
   // listeners
+  private listenersStatsUser: Array<(statsUser: IStats | null) => void> = [];
   private listenersStars: Array<(stars: Set<string>) => void> = [];
 
   private constructor() {
@@ -50,12 +55,13 @@ class ManagerTraceUser {
         if (JSON.stringify(this.account) !== JSON.stringify(account)) {
           this.account = account;
           this.loadTraceData();
+          this.loadStatsUser();
         }
       }
     });
   }
 
-  public async loadTraceData() {
+  private async loadTraceData() {
     if (!this.db || !this.account) return;
 
     const docStarsRef = await getDoc(
@@ -110,82 +116,148 @@ class ManagerTraceUser {
     }
   }
 
-  public async updateCounterMinutesChannels(channelId: string) {
-    if (!channelId) return;
-    if (channelId === "") return;
+  private async loadStatsUser() {
     if (!this.db || !this.account) return;
+
+    const docStatsRef = await getDoc(
+      doc(this.db, stateCollections.stats, this.account.id)
+    ).catch((error) => {
+      console.log("Error getting document:", error);
+    });
+    if (docStatsRef && docStatsRef.exists()) {
+      this.statsUser = docStatsRef.data() as IStats;
+    } else {
+      const statsTemplate: IStats = {
+        countStarsByOtherUsers: 0,
+        countBooksByOtherUsers: 0,
+        countPosts: 0,
+        countUpvotesComments: 0,
+      };
+
+      await setDoc(
+        doc(this.db, stateCollections.stats, this.account.id),
+        statsTemplate
+      );
+      this.statsUser = statsTemplate;
+    }
+
+    this.notifyListenersStatsUser();
   }
 
   // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
   // user actions
-  public async addStar(id: string) {
+  public async addStar(post: IPost) {
     if (!this.db || !this.account) return;
-    if (this.setStars.has(id)) return;
+    if (this.setStars.has(post.id)) return;
 
-    this.setStars.add(id);
+    this.setStars.add(post.id);
     this.notifyListenersStars();
 
     await updateDoc(
       doc(this.db, stateCollections.traceUserStars, this.account.id),
       {
-        stars: arrayUnion(id),
+        stars: arrayUnion(post.id),
       }
     ).catch((error) => {
       console.log(error.message);
     });
 
+    if (this.account.id !== post.idCreator) {
+      await this.makeSureStatsUserExist(post.idCreator);
+      await updateDoc(doc(this.db, stateCollections.stats, post.idCreator), {
+        countStarsByOtherUsers: increment(1),
+      });
+    }
+
     this.notifyListenersStars();
   }
 
-  public async removeStar(id: string) {
+  public async removeStar(post: IPost) {
     if (!this.db || !this.account) return;
-    if (!this.setStars.has(id)) return;
+    if (!this.setStars.has(post.id)) return;
 
-    this.setStars.delete(id);
+    this.setStars.delete(post.id);
     this.notifyListenersStars();
 
     await updateDoc(
       doc(this.db, stateCollections.traceUserStars, this.account.id),
       {
-        stars: arrayRemove(id),
+        stars: arrayRemove(post.id),
       }
     );
+
+    if (this.account.id !== post.idCreator) {
+      await this.makeSureStatsUserExist(post.idCreator);
+      await updateDoc(doc(this.db, stateCollections.stats, post.idCreator), {
+        countStarsByOtherUsers: increment(-1),
+      });
+    }
 
     this.notifyListenersStars();
   }
 
-  public async addBook(id: string) {
+  public async addBook(post: IPost) {
     if (!this.db || !this.account) return;
-    if (this.setBooks.has(id)) return;
+    if (this.setBooks.has(post.id)) return;
 
-    this.setBooks.add(id);
+    this.setBooks.add(post.id);
     this.notifyListenersBooks();
 
     await updateDoc(
       doc(this.db, stateCollections.traceUserBooks, this.account.id),
       {
-        books: arrayUnion(id),
+        books: arrayUnion(post.id),
       }
     );
+
+    if (this.account.id !== post.idCreator) {
+      await this.makeSureStatsUserExist(post.idCreator);
+      await updateDoc(doc(this.db, stateCollections.stats, post.idCreator), {
+        countBooksByOtherUsers: increment(1),
+      });
+
+      this.notifyListenersBooks();
+    }
+  }
+
+  public async removeBook(post: IPost) {
+    if (!this.db || !this.account) return;
+    if (!this.setBooks.has(post.id)) return;
+
+    this.setBooks.delete(post.id);
+    this.notifyListenersBooks();
+
+    await updateDoc(
+      doc(this.db, stateCollections.traceUserBooks, this.account.id),
+      {
+        books: arrayRemove(post.id),
+      }
+    );
+
+    if (this.account.id !== post.idCreator) {
+      await this.makeSureStatsUserExist(post.idCreator);
+      await updateDoc(doc(this.db, stateCollections.stats, post.idCreator), {
+        countBooksByOtherUsers: increment(-1),
+      });
+    }
 
     this.notifyListenersBooks();
   }
 
-  public async removeBook(id: string) {
-    if (!this.db || !this.account) return;
-    if (!this.setBooks.has(id)) return;
+  private async makeSureStatsUserExist(idUser: string) {
+    if (!this.db) return;
+    const docRef = doc(this.db, stateCollections.stats, idUser);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      const statsTemplate: IStats = {
+        countStarsByOtherUsers: 0,
+        countBooksByOtherUsers: 0,
+        countPosts: 0,
+        countUpvotesComments: 0,
+      };
 
-    this.setBooks.delete(id);
-    this.notifyListenersBooks();
-
-    await updateDoc(
-      doc(this.db, stateCollections.traceUserBooks, this.account.id),
-      {
-        books: arrayRemove(id),
-      }
-    );
-
-    this.notifyListenersBooks();
+      await setDoc(docRef, statsTemplate);
+    }
   }
 
   public async addComment(id: string) {
@@ -222,6 +294,29 @@ class ManagerTraceUser {
     this.notifyListenersComments();
   }
   // user actions
+  // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+  // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+  // state stats user
+  private notifyListenersStatsUser() {
+    if (!this.statsUser) return;
+    this.listenersStatsUser.forEach((listener) => {
+      listener(this.statsUser);
+    });
+  }
+  public addListenerStatsUser(
+    listener: (statsUser: IStats | null) => void
+  ): (statsUser: IStats | null) => void {
+    this.listenersStatsUser.push(listener);
+    listener(this.statsUser);
+    return listener;
+  }
+  public removeListenerStatsUser(listener: (statsUser: IStats | null) => void) {
+    this.listenersStatsUser = this.listenersStatsUser.filter(
+      (l) => l !== listener
+    );
+  }
+  // state stats user
   // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
   // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----

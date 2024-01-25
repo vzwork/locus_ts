@@ -13,6 +13,7 @@ const collectionsTest = {
   competencyUser: "testCompetencyUser",
   organizationChats: "testOrganizationChats",
   messages: "testMessages",
+  stats: "testStats",
 };
 
 const storageTest = {
@@ -32,6 +33,7 @@ const collectionsProd = {
   competencyUser: "competencyUser",
   organizationChats: "organizationChats",
   messages: "messages",
+  stats: "stats",
 };
 
 const storageProd = {

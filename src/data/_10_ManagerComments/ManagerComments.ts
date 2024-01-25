@@ -3,6 +3,7 @@ import {
   Firestore,
   arrayUnion,
   doc,
+  getDoc,
   getFirestore,
   increment,
   onSnapshot,
@@ -16,6 +17,7 @@ import ManagerAccount from "../_1_ManagerAccount/ManagerAccount";
 import ManagerContent from "../_9_ManagerContent/ManagerContent";
 import { IPost } from "../post";
 import ManagerNotificationsUser from "../_3_ManagerNotificationsUser/ManagerNotificationsUser";
+import { IStats } from "../stats";
 
 const VERSION_COMMENT = "1.0.0";
 
@@ -253,6 +255,21 @@ class ManagerComments {
     }).catch((error) => {
       console.error("Error adding comment: ", error.message);
     });
+  }
+  private async makeSureStatsUserExist(idUser: string) {
+    if (!this.db) return;
+    const docRef = doc(this.db, stateCollections.stats, idUser);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      const statsTemplate: IStats = {
+        countStarsByOtherUsers: 0,
+        countBooksByOtherUsers: 0,
+        countPosts: 0,
+        countUpvotesComments: 0,
+      };
+
+      await setDoc(docRef, statsTemplate);
+    }
   }
 
   // actions

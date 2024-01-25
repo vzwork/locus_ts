@@ -77,7 +77,7 @@ function ButtonSignedInSmall() {
 
   return (
     <>
-      <IconButton size="small" onClick={handleClick} color="inherit">
+      <IconButton size="small" onClick={handleClick}>
         <ManageAccountsIcon />
       </IconButton>
       <Menu open={open} anchorEl={anchorEl} onClose={handleClose}>

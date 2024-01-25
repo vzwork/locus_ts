@@ -44,6 +44,7 @@ import ButtonNotifications from "../components/ButtonNotifications/ButtonNotific
 import WindowChannelsMostTimeSpent from "../components/WindowChannelsMostTimeSpent/WindowChannelsMostTimeSpent";
 import { ButtonSignedInSmall } from "../components/ButtonSignedIn/ButtonSignedIn";
 import ButtonChats from "../components/ButtonChats/ButtonChats";
+import StatsUser from "../components/StatsUser/StatsUser";
 
 function formatNumber(num: number) {
   if (num < 1000) {
@@ -181,8 +182,18 @@ function ChannelsDesktop() {
               </Box>
             </Grid>
             <Grid item md={3} lg={2.5} xl={2}>
-              <Box p={1} sx={{ position: "sticky", top: "0" }}>
+              <Box
+                p={1}
+                sx={{
+                  position: "sticky",
+                  top: "0",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.5rem",
+                }}
+              >
                 <WindowChannelsMostTimeSpent />
+                <StatsUser />
               </Box>
             </Grid>
           </Grid>

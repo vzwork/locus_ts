@@ -209,10 +209,10 @@ export default function Post({
                 }
                 if (!stars?.has(post.id)) {
                   managerContent.addStarPost(post);
-                  managerTraceUser.addStar(post.id);
+                  managerTraceUser.addStar(post);
                 } else {
                   managerContent.removeStarPost(post);
-                  managerTraceUser.removeStar(post.id);
+                  managerTraceUser.removeStar(post);
                 }
               }}
               sx={{
@@ -239,10 +239,10 @@ export default function Post({
                 }
                 if (!books?.has(post.id)) {
                   managerContent.addBookPost(post);
-                  managerTraceUser.addBook(post.id);
+                  managerTraceUser.addBook(post);
                 } else {
                   managerContent.removeBookPost(post);
-                  managerTraceUser.removeBook(post.id);
+                  managerTraceUser.removeBook(post);
                 }
               }}
               startIcon={<MenuBookIcon />}
@@ -619,7 +619,7 @@ function Video({ post, expanded }: { post: IPost; expanded: boolean }) {
       <></>
       <Box>
         <Collapse in={!expanded}>
-          <Box sx={{ display: "flex", flexWrap: "wrap" }}>
+          <Box sx={{ display: "flex" }}>
             <YouTube
               videoId={data.id}
               opts={{
@@ -633,7 +633,7 @@ function Video({ post, expanded }: { post: IPost; expanded: boolean }) {
               id="video"
               //
             />
-            <Box color="active.main" pl="1rem">
+            <Box color="active.main" pl="1rem" sx={{ textWrap: "wrap" }}>
               {data.caption}
             </Box>
           </Box>
@@ -652,7 +652,7 @@ function Video({ post, expanded }: { post: IPost; expanded: boolean }) {
             id="video"
             //
           />
-          <Box color="active.main" py="0.5rem">
+          <Box color="active.main" py="0.5rem" sx={{ textWrap: "wrap" }}>
             {data.caption}
           </Box>
         </Collapse>
