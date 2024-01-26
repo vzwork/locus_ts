@@ -51,38 +51,40 @@ export default function WindowChannelsMostTimeSpent() {
           <Box>minutes spent</Box>
         </Box>
         <Box>
-          <Box>
-            {competencyChannelsMostTimeSpent.map((competency, idx) => (
-              <Box
-                key={idx}
-                sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <Box>{competency.minutesSpent}</Box>
-                <Button
-                  variant={
-                    // channel.id === channelCurrent?.id ? "contained" : "outlined"
-                    "outlined"
-                  }
-                  color={
-                    // channel.id === channelCurrent?.id ? "primary" : "info"
-                    "info"
-                  }
-                  size="small"
-                  sx={{
-                    overflow: "hidden",
-                    whiteSpace: "nowrap",
-                    display: "flex",
-                    justifyContent: "left",
-                    borderRadius: "2rem",
-                  }}
-                  onClick={() => {
-                    navigate(`/channels/${channels.at(idx)?.id}`);
-                  }}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+            {competencyChannelsMostTimeSpent
+              .slice(0, 3)
+              .map((competency, idx) => (
+                <Box
+                  key={idx}
+                  sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
                 >
-                  {channels.at(idx)?.name}
-                </Button>
-              </Box>
-            ))}
+                  <Box>{competency.minutesSpent}</Box>
+                  <Button
+                    variant={
+                      // channel.id === channelCurrent?.id ? "contained" : "outlined"
+                      "outlined"
+                    }
+                    color={
+                      // channel.id === channelCurrent?.id ? "primary" : "info"
+                      "info"
+                    }
+                    size="small"
+                    sx={{
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      display: "flex",
+                      justifyContent: "left",
+                      borderRadius: "2rem",
+                    }}
+                    onClick={() => {
+                      navigate(`/channels/${channels.at(idx)?.id}`);
+                    }}
+                  >
+                    {channels.at(idx)?.name}
+                  </Button>
+                </Box>
+              ))}
           </Box>
         </Box>
       </Box>

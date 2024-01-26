@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { IAccount } from "../data/account";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useAccount from "../data/_1_ManagerAccount/useAccount";
 import ManagerAccount from "../data/_1_ManagerAccount/ManagerAccount";
 import useStatsUser from "../data/_4_ManagerTraceUser/useStatsUser";
@@ -27,6 +27,8 @@ import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
 import PhotoCameraFrontIcon from "@mui/icons-material/PhotoCameraFront";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import useStateStars from "../data/_4_ManagerTraceUser/useStateStars";
+import usePosts from "../data/_9_ManagerContent/usePosts";
+import Post from "../components/Post/Post";
 
 function formatNumber(num: number | undefined) {
   if (!num) return "0";
@@ -41,6 +43,7 @@ function formatNumber(num: number | undefined) {
 
 export default function Accounts() {
   const params = useParams();
+  const navigate = useNavigate();
   const account = useAccount();
   const managerAccount = ManagerAccount;
   const statsUser = useStatsUser();
@@ -79,7 +82,11 @@ export default function Accounts() {
               bgcolor="background.transperent"
               sx={{ backdropFilter: "blur(2px)", height: "min-content" }}
             >
-              <IconButton>
+              <IconButton
+                onClick={() => {
+                  navigate("/");
+                }}
+              >
                 <HomeIcon />
               </IconButton>
             </Box>
@@ -156,6 +163,7 @@ export default function Accounts() {
             ) : null}
           </Box>
           <ContentFilterOrder thisAccount={thisAccount} />
+          <Content />
         </Box>
       </Container>
     </>
@@ -169,7 +177,6 @@ function ContentFilterOrder({
 }) {
   const managerContent = ManagerContent;
   const account = useAccount();
-  const stars = useStateStars();
 
   const [filterQuotes, setFilterQuotes] = useState(
     localStorage.getItem("filterQuotes") === "true" ? true : false
@@ -201,12 +208,12 @@ function ContentFilterOrder({
   useEffect(() => {
     if (option === "user posts") {
       if (thisAccount) managerContent.setQueryUsersPosts(thisAccount.id);
-    } else if (option === "stared") {
+    } else if (option === "starred") {
       if (thisAccount) managerContent.setQueryUsersStars(thisAccount.id);
     } else if (option === "booked") {
       if (thisAccount) managerContent.setQueryUsersBooks(thisAccount.id);
     }
-  }, [option]);
+  }, [option, thisAccount]);
 
   return (
     <>
@@ -293,13 +300,38 @@ function ContentFilterOrder({
             variant="standard"
             size="small"
             value={option}
-            // onChange={(e) => setOrder(e.target.value as QueryOrder)}
+            onChange={(e) => setOption(e.target.value)}
           >
             <MenuItem value={"user posts"}>user posts</MenuItem>
-            <MenuItem value={"stared"}>stared</MenuItem>
+            <MenuItem value={"starred"}>starred</MenuItem>
             <MenuItem value={"booked"}>booked</MenuItem>
           </Select>
         </Box>
+      </Box>
+    </>
+  );
+}
+
+function Content() {
+  const posts = usePosts();
+
+  return (
+    <>
+      <></>
+      <></>
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.5rem",
+        }}
+      >
+        {posts.map((post, idx) => (
+          <Box key={idx} sx={{ width: "100%" }}>
+            <Post post={post} />
+          </Box>
+        ))}
       </Box>
     </>
   );

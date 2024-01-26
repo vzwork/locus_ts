@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Box,
   Button,
   Container,
@@ -45,6 +46,9 @@ import WindowChannelsMostTimeSpent from "../components/WindowChannelsMostTimeSpe
 import { ButtonSignedInSmall } from "../components/ButtonSignedIn/ButtonSignedIn";
 import ButtonChats from "../components/ButtonChats/ButtonChats";
 import StatsUser from "../components/StatsUser/StatsUser";
+import useReferencesChannels from "../data/_11_ManagerSearch/useReferencesChannels";
+import { IReferenceChannel } from "../data/referenceChannel";
+import ManagerSearch from "../data/_11_ManagerSearch/ManagerSearch";
 
 function formatNumber(num: number) {
   if (num < 1000) {
@@ -1007,7 +1011,21 @@ function ChannelsNavigation() {
 }
 
 function Search() {
+  const params = useParams();
+  const navigate = useNavigate();
+  const referencesChannels = useReferencesChannels();
+  const managerSearch = ManagerSearch;
   const [text, setText] = useState("");
+  const [referenceChannel, setReferenceChannel] =
+    useState<IReferenceChannel | null>(null);
+
+  useEffect(() => {
+    // console.log("params.idChannel", params.idChannel);
+    // console.log("referenceChannel?.id", referenceChannel?.id);
+    // if (params.idChannel === referenceChannel?.id) {
+    //   setText("");
+    // }
+  }, [text, params.idChannel, referenceChannel]);
 
   return (
     <>
@@ -1020,23 +1038,37 @@ function Search() {
           padding: "0.5rem",
           boxSizing: "border-box",
           backdropFilter: "blur(2px)",
+          position: "relative",
+          zIndex: "3",
         }}
         borderRadius="0.5rem"
       >
-        <TextField
-          variant="standard"
-          placeholder="search channel"
-          fullWidth
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
+        <Autocomplete
+          id="search"
+          disablePortal
+          noOptionsText="(enter) to search database"
+          getOptionLabel={(option) => option.name}
+          options={referencesChannels}
+          // value={referenceChannel}
+          onChange={(e, v) => {
+            setReferenceChannel(v);
+            navigate(`/channels/${v?.id}`);
           }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="standard"
+              placeholder="search channel"
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+              }}
+            />
+          )}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              managerSearch.searchChannelsByName(text);
+            }
           }}
         />
       </Box>

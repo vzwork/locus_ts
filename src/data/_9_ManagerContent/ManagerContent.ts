@@ -2,6 +2,7 @@ import {
   Firestore,
   collection,
   doc,
+  getDoc,
   getDocs,
   getFirestore,
   increment,
@@ -53,7 +54,9 @@ class ManagerContent {
   private idUser: string | null = null;
   private queryUsersPosts: boolean = false;
   private queryUsersStars: boolean = false;
+  private idsPostsUsersStars: string[] = [];
   private queryUsersBooks: boolean = false;
+  private idsPostsUsersBooks: string[] = [];
   private listenersContent: ((posts: IPost[]) => void)[] = [];
   private content: IPost[] = [];
 
@@ -98,27 +101,66 @@ class ManagerContent {
     this.queryUsersPosts = true;
     this.queryUsersStars = false;
     this.queryUsersBooks = false;
-    this.queryContent();
+    this.queryContentUsersPosts();
   }
-  public setQueryUsersStars(idUser: string) {
+  public async setQueryUsersStars(idUser: string) {
     this.idUser = idUser;
     this.queryUsersPosts = false;
     this.queryUsersStars = true;
     this.queryUsersBooks = false;
-    this.queryContent();
+
+    // retrieve idsPosts
+    if (!this.db) return;
+    const docSnapshot = await getDoc(
+      doc(this.db, stateCollections.traceUserStars, idUser)
+    ).catch((error) => {
+      console.log(error.message);
+    });
+    if (!docSnapshot) return;
+    if (!docSnapshot.exists()) return;
+    const data = docSnapshot.data();
+    if (!data) return;
+    const idsPosts = data.stars;
+    this.idsPostsUsersStars = idsPosts;
+
+    this.queryContentUsersStars();
   }
-  public setQueryUsersBooks(idUser: string) {
+  public async setQueryUsersBooks(idUser: string) {
     this.idUser = idUser;
     this.queryUsersPosts = false;
     this.queryUsersStars = false;
     this.queryUsersBooks = true;
-    this.queryContent();
+
+    // retrieve idsPosts
+    if (!this.db) return;
+    const docSnapshot = await getDoc(
+      doc(this.db, stateCollections.traceUserBooks, idUser)
+    ).catch((error) => {
+      console.log(error.message);
+    });
+    if (!docSnapshot) return;
+    if (!docSnapshot.exists()) return;
+    const data = docSnapshot.data();
+    if (!data) return;
+    const idsPosts = data.books;
+    this.idsPostsUsersBooks = idsPosts;
+
+    this.queryContentUsersBooks();
   }
   public setTypesContentActive(types: string[]) {
     if (this.typesContentActive === types) return;
     if (arraysEqual(types, this.typesContentActive)) return;
     this.typesContentActive = types;
-    this.queryContent();
+
+    if (this.queryUsersPosts) {
+      this.queryContentUsersPosts();
+    } else if (this.queryUsersStars) {
+      this.queryContentUsersStars();
+    } else if (this.queryUsersBooks) {
+      this.queryContentUsersBooks();
+    } else {
+      this.queryContent();
+    }
   }
   public setOrder(order: QueryOrder) {
     if (this.order === order) return;
@@ -664,6 +706,76 @@ class ManagerContent {
 
   // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
   // query
+
+  private async queryContentUsersPosts() {
+    if (!this.db) return;
+    if (!this.idUser) return;
+
+    const q = query(
+      collection(this.db, stateCollections.posts),
+      where("idCreator", "==", this.idUser),
+      where("type", "in", this.typesContentActive)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    const content: IPost[] = [];
+    querySnapshot.forEach((doc) => {
+      const post = doc.data() as IPost;
+      post.countViews++;
+      updateDoc(doc.ref, { countViews: increment(1) });
+      content.push(post);
+    });
+    this.content = content;
+
+    this.notifyListenersContent();
+  }
+  private async queryContentUsersStars() {
+    if (!this.db) return;
+    if (!this.idUser) return;
+
+    const q = query(
+      collection(this.db, stateCollections.posts),
+      where("id", "in", this.idsPostsUsersStars),
+      where("type", "in", this.typesContentActive)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    const content: IPost[] = [];
+    querySnapshot.forEach((doc) => {
+      const post = doc.data() as IPost;
+      post.countViews++;
+      updateDoc(doc.ref, { countViews: increment(1) });
+      content.push(post);
+    });
+    this.content = content;
+
+    this.notifyListenersContent();
+  }
+  private async queryContentUsersBooks() {
+    if (!this.db) return;
+    if (!this.idUser) return;
+
+    const q = query(
+      collection(this.db, stateCollections.posts),
+      where("id", "in", this.idsPostsUsersBooks),
+      where("type", "in", this.typesContentActive)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    const content: IPost[] = [];
+    querySnapshot.forEach((doc) => {
+      const post = doc.data() as IPost;
+      post.countViews++;
+      updateDoc(doc.ref, { countViews: increment(1) });
+      content.push(post);
+    });
+    this.content = content;
+
+    this.notifyListenersContent();
+  }
   private async queryContent() {
     if (!this.db) return;
     if (!this.channelCurrent) return;

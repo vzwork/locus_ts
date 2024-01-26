@@ -139,6 +139,13 @@ export default function Post({
           >
             <MenuItem
               onClick={() => {
+                navigate(`/accounts/${post.idCreator}`);
+              }}
+            >
+              profile
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
                 if (account && post.idCreator !== account.id) {
                   managerChats.createChat(post.idCreator);
                   const idChat = account.id.localeCompare(post.idCreator)

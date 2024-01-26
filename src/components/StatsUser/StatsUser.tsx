@@ -37,7 +37,7 @@ export default function StatsUser() {
         borderRadius="0.5rem"
       >
         <Box color="info.main">
-          other people staring, booking, upvoting your content or comments
+          other people starring, booking, upvoting your content or comments
         </Box>
         <Box>your stats:</Box>
         <Box sx={{ display: "flex", justifyContent: "space-around" }}>

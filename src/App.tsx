@@ -26,6 +26,7 @@ import ManagerCompetencyUser from "./data/_6_ManagerCompetencyUser/ManagerCompet
 import Accounts from "./pages/Accounts";
 import ManagerChats from "./data/_5_ManagerChats/ManagerChats";
 import Chats from "./pages/Chats";
+import ManagerSearch from "./data/_11_ManagerSearch/ManagerSearch";
 
 const WrapperBackground = () => {
   return (
@@ -77,6 +78,8 @@ export default function App() {
   managerCompetencyUser.init();
   const managerChats = ManagerChats;
   managerChats.init();
+  const managerSearch = ManagerSearch;
+  managerSearch.init();
 
   return (
     <>
